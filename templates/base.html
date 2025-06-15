@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Stock Manager{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.5.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f8f9fa;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #343a40;
+      color: white;
+      padding: 1rem 2rem;
+    }
+    main {
+      flex-grow: 1;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+    footer {
+      background: #343a40;
+      color: #bbb;
+      text-align: center;
+      padding: 1rem 2rem;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+  <header class="d-flex justify-content-between align-items-center">
+    <h1 class="h4 m-0">Stock Manager</h1>
+    {% if session.get('user_id') %}
+      <div>Logged in as: <strong>{{ session.get('username') }}</strong> | <a href="{{ url_for('logout') }}" class="text-light text-decoration-underline">Logout</a></div>
+    {% endif %}
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    &copy; 2025 C. G. Ustundag - Stock Manager App
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
