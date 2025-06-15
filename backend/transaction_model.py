@@ -16,11 +16,10 @@ class Transaction:
     fee: float
     transaction_date: datetime 
 
-    def to_db_tuple(self):
+    def to_db_tuple(self, user_id: int):
         total_cost = (self.price_per_share * self.quantity) + self.fee
         cost_of_shares = (self.price_per_share * self.quantity)
         dirty_price_per_share = total_cost / self.quantity
-        user_id = config.USER_ID
         return (
             self.stock_symbol,
             self.transaction_type.value,
@@ -33,3 +32,4 @@ class Transaction:
             user_id,
             self.transaction_date.isoformat()
         )
+

@@ -3,6 +3,12 @@ from transaction_model import Transaction
 
 DB_FILE = "stocks.db"
 
+#* prepare db
+def db_prepare():
+    create_user_table()
+    create_transactions_table()
+
+#* create user table and default users if not exists
 def create_user_table():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -20,6 +26,7 @@ def create_user_table():
     conn.commit()
     conn.close()
 
+#* create transaction table if not exists
 def create_transactions_table():
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -42,11 +49,8 @@ def create_transactions_table():
     conn.commit()
     conn.close()
 
-def db_prepare():
-    create_user_table()
-    create_transactions_table()
-
-def save_transaction(transaction: Transaction):
+#* save transaction
+def save_transaction(transaction: Transaction, user_id: int):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute("""
@@ -62,6 +66,33 @@ def save_transaction(transaction: Transaction):
             user_id,
             transaction_date
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, transaction.to_db_tuple())
+    """, transaction.to_db_tuple(user_id))
     conn.commit()
     conn.close()
+
+
+#* get users
+def get_users():
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, username FROM users")
+    users = cursor.fetchall()
+    conn.close()
+    return [{"id": row[0], "username": row[1]} for row in users]
+
+#* get transactions by user
+def get_transactions_by_user(user_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT stock_symbol, transaction_type, quantity, total_cost, transaction_date FROM transactions WHERE user_id=?", (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [
+        {
+            "stock_symbol": row[0],
+            "transaction_type": row[1],
+            "quantity": row[2],
+            "total_cost": row[3],
+            "transaction_date": row[4]
+        } for row in rows
+    ]
