@@ -21,6 +21,12 @@ def select_user():
     config.USER_ID = user_id
     return jsonify({"status": "success"})
 
+@app.route("/api/user_logout", methods=["GET"])
+def user_logout():
+    session.pop("user_id", None)
+    return jsonify({"status": "success"})
+    
+
 @app.route("/api/transactions", methods=["GET"])
 def get_transactions():
     user_id = session.get("user_id")

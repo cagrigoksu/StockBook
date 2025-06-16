@@ -12,6 +12,22 @@ function Dashboard() {
     API.get("/transactions").then((res) => setTransactions(res.data));
   }, [userId, navigate]);
 
+  const handleLogout = async () => {
+    try {
+
+      const response = await API.get("/user_logout");
+
+      if (response.data.status === 'success') {
+        navigate('/'); 
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-7xl mx-auto">
@@ -65,7 +81,14 @@ function Dashboard() {
           </table>
         </div>
       </div>
+      <div class="fixed bottom-0 w-full bg-gray-200 p-4 flex justify-end">
+       <button class="bg-blue-500 text-white px-4 py-2 rounded mr-4"
+          onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
     </div>
+    
   );
 }
 
