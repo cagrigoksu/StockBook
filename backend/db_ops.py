@@ -84,7 +84,7 @@ def get_users():
 def get_transactions_by_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT stock_symbol, transaction_type, quantity, total_cost, transaction_date FROM transactions WHERE user_id=?", (user_id,))
+    cursor.execute("SELECT stock_symbol, transaction_type, quantity, fee, price_per_share, total_cost, transaction_date FROM transactions WHERE user_id=?", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [
@@ -92,7 +92,9 @@ def get_transactions_by_user(user_id):
             "stock_symbol": row[0],
             "transaction_type": row[1],
             "quantity": row[2],
-            "total_cost": row[3],
-            "transaction_date": row[4]
+            "fee": row[3],
+            "price_per_share": row[4],
+            "total_cost": row[5],
+            "transaction_date": row[6]
         } for row in rows
     ]
