@@ -1,5 +1,7 @@
 import sqlite3
-from transaction_model import Transaction
+from transaction_model import Transaction, TransactionTypeEnum
+import yfinance as yf
+import math
 
 DB_FILE = "stocks.db"
 
@@ -91,9 +93,60 @@ def get_transactions_by_user(user_id):
             "stock_symbol": row[0],
             "transaction_type": row[1],
             "quantity": row[2],
-            "fee": row[3],
+            "fee": round(row[3],2),
             "price_per_share": row[4],
             "total_cost": row[5],
             "transaction_date": row[6]
         } for row in rows
     ]
+
+#* get portfolio by user
+def get_portfolio_by_user(user_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT stock_symbol, transaction_type, quantity FROM transactions WHERE user_id=? and transaction_type!=?", (user_id,TransactionTypeEnum.DIVIDEND.value,))
+    rows = cursor.fetchall()
+    conn.close()
+    result = [
+        {
+            "stock_symbol": row[0],
+            "transaction_type": row[1],
+            "quantity": row[2],
+\
+        } for row in rows
+    ]
+    
+    stocks = {}
+    for item in result:
+        symbol = item["stock_symbol"]
+        if symbol not in stocks:
+            stocks[symbol] = { 'quantity' : 0 }
+        
+        if item["transaction_type"] == TransactionTypeEnum.BUY.value:
+            stocks[symbol]['quantity'] += item['quantity']
+        elif item["transaction_type"] == TransactionTypeEnum.SELL.value:
+            stocks[symbol]['quantity'] -= item['quantity']
+    
+    stocks = {
+        symbol: data for symbol, data in stocks.items()
+        if not math.isclose(data['quantity'], 0.0, abs_tol=1e-10)
+    }
+    
+    response = []
+    for symbol, data in stocks.items():
+        try:
+            ticker = yf.Ticker(symbol)
+            last_price = ticker.analyst_price_targets['current']
+            current_value = data['quantity'] * last_price
+        except Exception as e:
+            print(f"Error fetching data for {symbol}: {e}")
+            last_price = 0
+            current_value = data['quantity'] * last_price
+        response.append({
+            "stock_symbol": symbol,
+            "quantity":  data['quantity'],
+            "last_price": round(last_price,2),
+            "current_value": round(current_value,2)
+        })
+        
+    return response

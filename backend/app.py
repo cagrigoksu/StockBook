@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, session, send_from_directory
 from flask_cors import CORS
-from db_ops import get_users, get_transactions_by_user, save_transaction, db_prepare
+import db_ops as do
 from transaction_model import Transaction, TransactionTypeEnum
 from revolut_ops import saveStatementData
 from datetime import datetime
@@ -11,11 +11,11 @@ app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 CORS(app, supports_credentials=True)
 
-db_prepare()
+do.db_prepare()
 
 @app.route("/api/users", methods=["GET"])
 def list_users():
-    return jsonify(get_users())
+    return jsonify(do.get_users())
 
 @app.route("/api/select_user", methods=["POST"])
 def select_user():
@@ -28,13 +28,20 @@ def select_user():
 def user_logout():
     session.pop("user_id", None)
     return jsonify({"status": "success"})
+
+@app.route("/api/portfolio", methods=["GET"])
+def get_portfolio():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify([])
+    return jsonify(do.get_portfolio_by_user(user_id))
     
 @app.route("/api/transactions", methods=["GET"])
 def get_transactions():
     user_id = session.get("user_id")
     if not user_id:
         return jsonify([])
-    return jsonify(get_transactions_by_user(user_id))
+    return jsonify(do.get_transactions_by_user(user_id))
 
 @app.route("/api/add_transaction", methods=["POST"])
 def add_transaction():
@@ -51,7 +58,7 @@ def add_transaction():
         fee=data["fee"],
         transaction_date=datetime.fromisoformat(data["transaction_date"])
     )
-    save_transaction(tx, int(user_id))
+    do.save_transaction(tx, int(user_id))
     return jsonify({"status": "saved"})
 
 @app.route("/api/upload_statement", methods=["POST"])

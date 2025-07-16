@@ -27,6 +27,10 @@ def saveStatementData(file):
             total_amount = row['Total Amount'] if isinstance(row['Total Amount'], float)  else float(re.sub(r'[^\d\.]', '', row['Total Amount'].replace(',', '')))
             fee_ = total_amount - (quantity * pps)
             taction_type = TransactionTypeEnum.BUY if row['Type'] == "BUY - MARKET" else TransactionTypeEnum.SELL
+            if row['Type'] == 'BUY - MARKET' or row['Type'] == 'BUY - LIMIT':
+                taction_type = TransactionTypeEnum.BUY
+            elif row['Type'] == 'SELL - MARKET' or row['Type'] == 'SELL - LIMIT':
+                taction_type = TransactionTypeEnum.SELL
             
         dt_utc = parser.parse(row['Date'])
         dt_cet = dt_utc.astimezone(ZoneInfo('Europe/Berlin'))
@@ -38,6 +42,12 @@ def saveStatementData(file):
             transaction_type= taction_type,
             fee= fee_,
             transaction_date=dt_cet
-        )        
+        )
+        
+        if tx.stock_symbol == "RHM":
+            tx.stock_symbol = "RHM.DE"   
+        
+        if tx.stock_symbol == "M0YN":
+            tx.stock_symbol = "M0YN.F"        
         
         save_transaction(tx, config.USER_ID)

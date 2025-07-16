@@ -6,6 +6,7 @@ import config
 class TransactionTypeEnum(Enum):
     BUY = "BUY"
     SELL = "SELL"
+    SELL_LIMIT = "SELL_LIMIT"
     DIVIDEND = "DIVIDEND"
 
 @dataclass
