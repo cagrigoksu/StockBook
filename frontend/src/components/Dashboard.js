@@ -10,14 +10,18 @@ function Dashboard() {
   const fileInputRef = useRef(null);
   const userId = localStorage.getItem("user_id");
 
-  useEffect(() => {
-    if (!userId) return navigate("/");
+  const fetchPortfolio = () => {
     API.get("/portfolio").then((res) => setPortfolio(res.data));
-  }, [userId, navigate]);
+  };
+
+  const fetchTransactions = () => {
+    API.get("/transactions").then((res) => setTransactions(res.data));
+  };
 
   useEffect(() => {
     if (!userId) return navigate("/");
-    API.get("/transactions").then((res) => setTransactions(res.data));
+    fetchPortfolio();
+    fetchTransactions();
   }, [userId, navigate]);
 
   const handleLogout = async () => {
@@ -49,7 +53,8 @@ function Dashboard() {
       });
 
       alert(res.data.message || "Upload succeeded!");
-      navigate("/dashboard");
+      fetchPortfolio();
+      fetchTransactions(); // Reload table data
     } catch (err) {
       console.error(err);
       alert("Upload failed");
@@ -81,17 +86,13 @@ function Dashboard() {
           ))}
         </div>
 
-        {/* tabs content */}
+        {/* Overview Tab */}
         {activeTab === 0 && (
           <div className="flex flex-col h-[calc(100vh-180px)]">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-3xl font-bold text-gray-800">Your Portfolio</h1>
-              <div className="space-x-2">
-                
-              </div>
             </div>
 
-            {/* table container */}
             <div className="overflow-y-auto flex-grow rounded-xl shadow bg-white mb-8">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-800 text-white sticky top-0">
@@ -120,6 +121,7 @@ function Dashboard() {
           </div>
         )}
 
+        {/* Performance Tab */}
         {activeTab === 1 && (
           <div>
             <h2 className="text-xl font-semibold mb-2">Performance</h2>
@@ -127,6 +129,7 @@ function Dashboard() {
           </div>
         )}
 
+        {/* Transactions Tab */}
         {activeTab === 2 && (
           <div className="flex flex-col h-[calc(100vh-180px)]">
             <div className="flex justify-between items-center mb-4">
@@ -154,7 +157,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* table container */}
             <div className="overflow-y-auto flex-grow rounded-xl shadow bg-white mb-8">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-800 text-white sticky top-0">
@@ -190,7 +192,6 @@ function Dashboard() {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Logout Button */}
