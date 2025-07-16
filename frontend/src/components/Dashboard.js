@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 
@@ -27,6 +27,31 @@ function Dashboard() {
     }
   };
 
+  const fileInputRef = useRef(null);
+  const openFilePicker = () => fileInputRef.current?.click();
+
+  const handleStatementUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await API.post("/upload_statement", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        withCredentials: true,
+      });
+
+      alert(res.data.message || "Upload succeeded!");
+      navigate("/dashboard");         
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed");
+    } finally {
+      e.target.value = "";           
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
@@ -40,12 +65,17 @@ function Dashboard() {
             >
               Add Stock
             </button>
-            <button
-              className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 transition"
-              onClick={() => alert("Upload logic coming soon")}
-            >
+            
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              onChange={handleStatementUpload}
+              style={{ display: "none" }}
+            />
+            <button onClick={openFilePicker} className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 transition">
               Upload Statement
-            </button>
+            </button>          
           </div>
         </div>
 

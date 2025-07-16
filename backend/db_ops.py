@@ -70,7 +70,6 @@ def save_transaction(transaction: Transaction, user_id: int):
     conn.commit()
     conn.close()
 
-
 #* get users
 def get_users():
     conn = sqlite3.connect(DB_FILE)

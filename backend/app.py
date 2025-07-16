@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify, session, send_from_directory
 from flask_cors import CORS
-from db_ops import get_users, get_transactions_by_user, save_transaction
+from db_ops import get_users, get_transactions_by_user, save_transaction, db_prepare
 from transaction_model import Transaction, TransactionTypeEnum
+from revolut_ops import saveStatementData
 from datetime import datetime
 import config
 import os
@@ -9,6 +10,8 @@ import os
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 CORS(app, supports_credentials=True)
+
+db_prepare()
 
 @app.route("/api/users", methods=["GET"])
 def list_users():
@@ -26,7 +29,6 @@ def user_logout():
     session.pop("user_id", None)
     return jsonify({"status": "success"})
     
-
 @app.route("/api/transactions", methods=["GET"])
 def get_transactions():
     user_id = session.get("user_id")
@@ -55,7 +57,9 @@ def add_transaction():
 @app.route("/api/upload_statement", methods=["POST"])
 def upload_statement():
     file = request.files['file']
-    file.save(os.path.join("uploads", file.filename))
+    #file_path = os.path.join('backend/uploads', str(config.USER_ID))
+    #file.save(file_path)
+    saveStatementData(file)
     return jsonify({"status": "uploaded"})
 
 if __name__ == '__main__':

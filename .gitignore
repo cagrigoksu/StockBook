@@ -1,3 +1,4 @@
 env/
-stocks.db
+backend/uploads/
+stocks*.db
 __pycache__
