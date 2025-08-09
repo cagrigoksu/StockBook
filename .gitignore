@@ -1,4 +1,10 @@
 env/
+
+.vscode/
 backend/uploads/
+
+frontend/.vscode/
+
 stocks*.db
+
 __pycache__

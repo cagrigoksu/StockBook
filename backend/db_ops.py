@@ -104,34 +104,75 @@ def get_transactions_by_user(user_id):
 def get_portfolio_by_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT stock_symbol, transaction_type, quantity FROM transactions WHERE user_id=? and transaction_type!=?", (user_id,TransactionTypeEnum.DIVIDEND.value,))
+    cursor.execute(
+        "SELECT stock_symbol, transaction_type, quantity, fee, transaction_date, price_per_share "
+        "FROM transactions WHERE user_id=? and transaction_type!=? ORDER BY transaction_date ASC",
+        (user_id, TransactionTypeEnum.DIVIDEND.value)
+    )
     rows = cursor.fetchall()
     conn.close()
+
     result = [
         {
             "stock_symbol": row[0],
             "transaction_type": row[1],
             "quantity": row[2],
-\
+            "fee": row[3],
+            "transaction_date": row[4],
+            "price_per_share": row[5]
         } for row in rows
     ]
-    
+
     stocks = {}
+    init_value = []  # FIFO buy lots with outstanding qty
+
     for item in result:
         symbol = item["stock_symbol"]
+        qty = item["quantity"]
+
         if symbol not in stocks:
-            stocks[symbol] = { 'quantity' : 0 }
-        
+            stocks[symbol] = {'quantity': 0, 'realized': 0, 'total_fee': 0}
+
         if item["transaction_type"] == TransactionTypeEnum.BUY.value:
-            stocks[symbol]['quantity'] += item['quantity']
+            stocks[symbol]['quantity'] += qty
+            stocks[symbol]['total_fee'] += item['fee']
+            init_value.append({
+                'stock_symbol': symbol,
+                'outstd_quantity': qty,
+                'price_per_share': item['price_per_share']
+            })
+
         elif item["transaction_type"] == TransactionTypeEnum.SELL.value:
-            stocks[symbol]['quantity'] -= item['quantity']
-    
-    stocks = {
-        symbol: data for symbol, data in stocks.items()
-        if not math.isclose(data['quantity'], 0.0, abs_tol=1e-10)
-    }
-    
+            stocks[symbol]['total_fee'] += item['fee']
+            stocks[symbol]['quantity'] -= qty
+
+            remaining_to_sell = qty
+            realized_gain = 0.0
+
+            for buy in init_value:
+                if buy['stock_symbol'] == symbol and remaining_to_sell > 0:
+                    qty_from_buy = min(buy['outstd_quantity'], remaining_to_sell)
+                    if qty_from_buy > 0:
+                        buy['outstd_quantity'] -= qty_from_buy
+                        remaining_to_sell -= qty_from_buy
+
+                        realized_gain += qty_from_buy * (item['price_per_share'] - buy['price_per_share'])
+
+            stocks[symbol]['realized'] += realized_gain
+
+        # remove fully sold stocks (quantity == 0)
+        stocks = {
+            sym: data for sym, data in stocks.items()
+            if not math.isclose(data['quantity'], 0.0, abs_tol=1e-10)
+        }
+
+    fifo_totals = {}
+    for entry in init_value:
+        if entry['outstd_quantity'] > 0:
+            symbol = entry['stock_symbol']
+            value = entry['outstd_quantity'] * entry['price_per_share']
+            fifo_totals[symbol] = fifo_totals.get(symbol, 0) + value
+
     response = []
     for symbol, data in stocks.items():
         try:
@@ -142,11 +183,17 @@ def get_portfolio_by_user(user_id):
             print(f"Error fetching data for {symbol}: {e}")
             last_price = 0
             current_value = data['quantity'] * last_price
+
         response.append({
             "stock_symbol": symbol,
-            "quantity":  data['quantity'],
-            "last_price": round(last_price,2),
-            "current_value": round(current_value,2)
+            "quantity": round(data['quantity'], 5),
+            "last_price": round(last_price, 2),
+            "initial_value": round(fifo_totals.get(symbol, 0), 2),
+            "current_value": round(current_value, 2),
+            "pl": round(data['realized'] + (current_value - fifo_totals.get(symbol, 0)), 2),
+            "realized": round(data['realized'], 2),
+            "unrealized": round(current_value - fifo_totals.get(symbol, 0), 2),
+            "total_fee": round(data['total_fee'], 2),
         })
-        
+
     return response
