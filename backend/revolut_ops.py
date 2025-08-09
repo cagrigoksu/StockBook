@@ -44,10 +44,14 @@ def saveStatementData(file):
             transaction_date=dt_cet
         )
         
+        #TODO : optimize here
         if tx.stock_symbol == "RHM":
             tx.stock_symbol = "RHM.DE"   
         
         if tx.stock_symbol == "M0YN":
-            tx.stock_symbol = "M0YN.F"        
+            tx.stock_symbol = "M0YN.F"  
+        
+        if tx.stock_symbol == "SGM":
+            tx.stock_symbol = "SGM.SG"        
         
         save_transaction(tx, config.USER_ID)

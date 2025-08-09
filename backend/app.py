@@ -29,6 +29,7 @@ def user_logout():
     session.pop("user_id", None)
     return jsonify({"status": "success"})
 
+#TODO : check realized return
 @app.route("/api/portfolio", methods=["GET"])
 def get_portfolio():
     user_id = session.get("user_id")
@@ -51,12 +52,12 @@ def add_transaction():
 
     data = request.json
     tx = Transaction(
-        stock_symbol=data["stock_symbol"],
-        transaction_type=TransactionTypeEnum[data["transaction_type"]],
-        quantity=data["quantity"],
-        price_per_share=data["price_per_share"],
-        fee=data["fee"],
-        transaction_date=datetime.fromisoformat(data["transaction_date"])
+        stock_symbol = data["stock_symbol"],
+        transaction_type = TransactionTypeEnum[data["transaction_type"]],
+        quantity = data["quantity"],
+        price_per_share = data["price_per_share"],
+        fee = data["fee"],
+        transaction_date = datetime.fromisoformat(data["transaction_date"])
     )
     do.save_transaction(tx, int(user_id))
     return jsonify({"status": "saved"})

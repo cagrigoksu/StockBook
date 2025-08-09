@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import API from "../api";
 
 function AddStock() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const passedSymbol = location.state?.symbol || ""; // empty if not provided
+
   const user_id = localStorage.getItem("user_id");
   const [form, setForm] = useState({
-    stock_symbol: "",
+    stock_symbol: passedSymbol,
     transaction_type: "BUY",
-    quantity: "",
-    price_per_share: "",
-    fee: "",
+    quantity: 0,
+    price_per_share: 0,
+    fee: 0,
     transaction_date: new Date().toISOString().slice(0, 16),
   });
 
