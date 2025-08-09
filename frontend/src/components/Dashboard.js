@@ -6,6 +6,8 @@ function Dashboard() {
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
+  const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
+  const [showTrRowRiskProfModal, setShowTrRowRiskProfModal ] = useState(false);
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const userId = localStorage.getItem("user_id");
@@ -17,6 +19,14 @@ function Dashboard() {
   const fetchTransactions = () => {
     API.get("/transactions").then((res) => setTransactions(res.data));
   };
+
+  const handlePoRowDetailsButton = () => {
+    setShowPoRowDetailsModal(true);
+  }
+
+  const handleTrRowRiskProfButton = () => {
+    setShowTrRowRiskProfModal(true);
+  }
 
   useEffect(() => {
     if (!userId) return navigate("/");
@@ -132,6 +142,7 @@ function Dashboard() {
                         <button
                           type="button"
                           className="bg-amber-700 border border-amber-700 hover:bg-amber-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          onClick={handlePoRowDetailsButton}
                         >
                         <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5"/>
@@ -217,6 +228,7 @@ function Dashboard() {
                         <button
                           type="button"
                           className="bg-lime-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          onClick={handleTrRowRiskProfButton}
                         >
                           <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path fill-rule="evenodd" d="M20.29 8.567c.133.323.334.613.59.85v.002a3.536 3.536 0 0 1 0 5.166 2.442 2.442 0 0 0-.776 1.868 3.534 3.534 0 0 1-3.651 3.653 2.483 2.483 0 0 0-1.87.776 3.537 3.537 0 0 1-5.164 0 2.44 2.44 0 0 0-1.87-.776 3.533 3.533 0 0 1-3.653-3.654 2.44 2.44 0 0 0-.775-1.868 3.537 3.537 0 0 1 0-5.166 2.44 2.44 0 0 0 .775-1.87 3.55 3.55 0 0 1 1.033-2.62 3.594 3.594 0 0 1 2.62-1.032 2.401 2.401 0 0 0 1.87-.775 3.535 3.535 0 0 1 5.165 0 2.444 2.444 0 0 0 1.869.775 3.532 3.532 0 0 1 3.652 3.652c-.012.35.051.697.184 1.02ZM9.927 7.371a1 1 0 1 0 0 2h.01a1 1 0 0 0 0-2h-.01Zm5.889 2.226a1 1 0 0 0-1.414-1.415L8.184 14.4a1 1 0 0 0 1.414 1.414l6.218-6.217Zm-2.79 5.028a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01Z" clip-rule="evenodd"/>
@@ -243,6 +255,42 @@ function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* PoRowDetailsModal */}
+      {showPoRowDetailsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
+            <h2 className="text-xl font-semibold mb-4">Details</h2>
+            <p>Body.</p>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowPoRowDetailsModal(false)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TrRowRiskProfModal */}
+      {showTrRowRiskProfModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
+            <h2 className="text-xl font-semibold mb-4">Risk and Profit</h2>
+            <p>Body.</p>
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setShowTrRowRiskProfModal(false)}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}      
 
       {/* Logout Button */}
       <div className="fixed bottom-0 w-full bg-gray-200 p-4 flex justify-end">
