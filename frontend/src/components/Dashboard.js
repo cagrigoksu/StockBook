@@ -6,8 +6,18 @@ function Dashboard() {
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
+
   const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
   const [showTrRowRiskProfModal, setShowTrRowRiskProfModal ] = useState(false);
+  const [checkboxTrRowRiskProfModal, setCheckboxTrRowRiskProfModal] = useState(false);
+
+  const [selectedPoRowSymbol, setSelectedPoRowSymbol] = useState("");
+  const [selectedTrRowSymbol, setSelectedTrRowSymbol] = useState("");
+  const [selectedRowQty, setSelectedRowQty] = useState(0);
+  const [selectedRowPrice, setSelectedRowPrice] = useState(0);
+  const [selectedRowFee, setSelectedRowFee] = useState(0);
+
+
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const userId = localStorage.getItem("user_id");
@@ -20,12 +30,23 @@ function Dashboard() {
     API.get("/transactions").then((res) => setTransactions(res.data));
   };
 
-  const handlePoRowDetailsButton = () => {
+  const handlePoRowDetailsButton = (symbol) => {
     setShowPoRowDetailsModal(true);
+
+    setSelectedPoRowSymbol(symbol);
   }
 
-  const handleTrRowRiskProfButton = () => {
+  const handleTrRowRiskProfButton = (symbol, qty, price, fee) => {
     setShowTrRowRiskProfModal(true);
+
+    setSelectedTrRowSymbol(symbol);
+    setSelectedRowQty(qty);
+    setSelectedRowPrice(price);
+    setSelectedRowFee(fee);
+  }
+
+  const handleCheckboxTrRowRiskProf = (checked) => {
+    setCheckboxTrRowRiskProfModal(prev => !prev);
   }
 
   useEffect(() => {
@@ -142,7 +163,7 @@ function Dashboard() {
                         <button
                           type="button"
                           className="bg-amber-700 border border-amber-700 hover:bg-amber-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
-                          onClick={handlePoRowDetailsButton}
+                          onClick={() => handlePoRowDetailsButton(p.stock_symbol)}
                         >
                         <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5"/>
@@ -228,7 +249,7 @@ function Dashboard() {
                         <button
                           type="button"
                           className="bg-lime-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
-                          onClick={handleTrRowRiskProfButton}
+                          onClick={() => handleTrRowRiskProfButton(t.stock_symbol, t.quantity, t.price_per_share, t.fee)}
                         >
                           <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
                             <path fill-rule="evenodd" d="M20.29 8.567c.133.323.334.613.59.85v.002a3.536 3.536 0 0 1 0 5.166 2.442 2.442 0 0 0-.776 1.868 3.534 3.534 0 0 1-3.651 3.653 2.483 2.483 0 0 0-1.87.776 3.537 3.537 0 0 1-5.164 0 2.44 2.44 0 0 0-1.87-.776 3.533 3.533 0 0 1-3.653-3.654 2.44 2.44 0 0 0-.775-1.868 3.537 3.537 0 0 1 0-5.166 2.44 2.44 0 0 0 .775-1.87 3.55 3.55 0 0 1 1.033-2.62 3.594 3.594 0 0 1 2.62-1.032 2.401 2.401 0 0 0 1.87-.775 3.535 3.535 0 0 1 5.165 0 2.444 2.444 0 0 0 1.869.775 3.532 3.532 0 0 1 3.652 3.652c-.012.35.051.697.184 1.02ZM9.927 7.371a1 1 0 1 0 0 2h.01a1 1 0 0 0 0-2h-.01Zm5.889 2.226a1 1 0 0 0-1.414-1.415L8.184 14.4a1 1 0 0 0 1.414 1.414l6.218-6.217Zm-2.79 5.028a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01Z" clip-rule="evenodd"/>
@@ -260,7 +281,7 @@ function Dashboard() {
       {showPoRowDetailsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-            <h2 className="text-xl font-semibold mb-4">Details</h2>
+            <h2 className="text-xl font-semibold mb-4">{selectedPoRowSymbol ? `${selectedPoRowSymbol} Details` : "Details"}</h2>
             <p>Body.</p>
             <div className="mt-6 flex justify-end">
               <button
@@ -277,16 +298,102 @@ function Dashboard() {
       {/* TrRowRiskProfModal */}
       {showTrRowRiskProfModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-96 p-6">
-            <h2 className="text-xl font-semibold mb-4">Risk and Profit</h2>
-            <p>Body.</p>
+
+          <div className="bg-white rounded-lg shadow-lg w-200 p-6">
+
+            <h2 className="text-xl font-semibold mb-4">{selectedTrRowSymbol ? `Risk and Profit Thresholds for ${selectedTrRowSymbol}` : "Risk and Profit Thresholdss"}</h2>
+            
+            <div className="mb-5">
+
+              <div class="flex">
+
+                  <div class="flex items-center h-5">
+
+                      <input type="checkbox" value="" class="w-4 h-4 rounded-sm" 
+                      onChange={handleCheckboxTrRowRiskProf}/>
+
+                  </div>
+
+                  <div class="ms-2 text-sm">
+                      <label for="helper-checkbox" class="font-medium">Include fees in calculations</label>
+                      <p id="helper-checkbox-text" class="text-xs font-normal text-gray-800">Considered sell fee is equal to {selectedRowFee} buy fee.</p>
+                  </div>
+
+              </div>
+
+            </div>
+
+            <div className="flex">
+
+              <div className="pl-2 pr-2.5">
+
+                <label className="text-red-800 block text-sm font-bold">5% Risk</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.95).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+                <label className="text-red-700 block text-sm font-bold">7% Risk</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.93).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+                <label className="text-red-600 block text-sm font-bold">10% Risk</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 )).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+
+              </div>
+
+              <div className="pl-2 pr-2.5">
+
+                <label className="text-green-800 block text-sm font-bold">5% Profit</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.05).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+                <label className="text-green-700 block text-sm font-bold">7% Profit</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.07).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+                <label className="text-green-600 block text-sm font-bold">10% Profit</label>
+                <input
+                  type="number"
+                  step="any"
+                  readOnly
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.1).toFixed(2)}
+                  className="mt-1 px-3 py-2 mb-3 border rounded-xl"
+                />
+
+              </div>
+
+            </div>
+
             <div className="mt-6 flex justify-end">
+
               <button
                 onClick={() => setShowTrRowRiskProfModal(false)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Close
               </button>
+
             </div>
           </div>
         </div>
@@ -294,12 +401,14 @@ function Dashboard() {
 
       {/* Logout Button */}
       <div className="fixed bottom-0 w-full bg-gray-200 p-4 flex justify-end">
+
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
           onClick={handleLogout}
         >
           Logout
         </button>
+
       </div>
     </div>
   );
