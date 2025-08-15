@@ -160,6 +160,7 @@ def get_transactions_by_user(user_id):
         } for row in rows
     ]
 
+#* get performance data by user
 def get_performance_data_by_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
@@ -181,8 +182,10 @@ def get_performance_data_by_user(user_id):
     for r in rows:
         symbol = r[0]
         qty = r[2]
-        fee = r[5]
+        remaining_qty = r[3]
+        fee = r[4]
         total_fee += fee
+        
         
         realized_return = r[6]
         if realized_return > 0:
@@ -194,10 +197,12 @@ def get_performance_data_by_user(user_id):
             
         current_value = qty * last_price
         
-        if current_value > 0:
-            total_unrealized_profit += current_value
-        else:
-            total_unrealized_loss += abs(current_value)
+        if remaining_qty > 0:
+            unrealized = remaining_qty * last_price
+            if unrealized > 0:
+                total_unrealized_profit += unrealized
+            else:
+                total_unrealized_loss += abs(unrealized)
             
     response = {
         "total_fee": round(total_fee,2),
