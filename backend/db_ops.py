@@ -184,6 +184,7 @@ def get_performance_data_by_user(user_id):
         qty = r[2]
         remaining_qty = r[3]
         fee = r[4]
+        pps = r[5]
         total_fee += fee
         
         
@@ -194,11 +195,11 @@ def get_performance_data_by_user(user_id):
             total_realized_loss += abs(realized_return)
             
         last_price = get_last_price(symbol)
-            
-        current_value = qty * last_price
         
         if remaining_qty > 0:
-            unrealized = remaining_qty * last_price
+            fee_per_share = fee / qty
+            net_share_price = pps + fee_per_share
+            unrealized = remaining_qty * (last_price - net_share_price)
             if unrealized > 0:
                 total_unrealized_profit += unrealized
             else:
@@ -232,11 +233,20 @@ def get_portfolio_by_user(user_id):
         symbol = row[0]
         transaction_type = row[1]
         quantity = row[2]
+        remaining_qty = row[3]
         fee = row[4]
+        pps = row[6]
         pnl = row[7]
 
         if symbol not in stocks:
-            stocks[symbol] = {'quantity': 0, 'realized': 0, 'total_fee': 0}
+            stocks[symbol] = {'quantity': 0, 'realized': 0, 'unrealized': 0, 'total_fee': 0}
+        
+        if remaining_qty > 0:
+            last_price = get_last_price(symbol)
+            fee_per_share = fee / quantity
+            net_share_price = pps + fee_per_share
+            unrealized = remaining_qty * (last_price - net_share_price)
+            stocks[symbol]['unrealized'] += unrealized
 
         if transaction_type == TransactionTypeEnum.BUY.value:
             stocks[symbol]['quantity'] += quantity
@@ -252,6 +262,9 @@ def get_portfolio_by_user(user_id):
         try:
             last_price = get_last_price(symbol)
             current_value = data['quantity'] * last_price
+            
+            
+            
         except Exception as e:
             print(f"Error fetching data for {symbol}: {e}")
             last_price = 0
@@ -264,7 +277,7 @@ def get_portfolio_by_user(user_id):
             "current_value": round(current_value, 2),
             "pl": round(data['realized'] + current_value, 2),  # use stored pnl
             "realized": round(data['realized'], 2),
-            "unrealized": round(current_value, 2),
+            "unrealized": round(data['unrealized'], 2),
             "total_fee": round(data['total_fee'], 2),
         })
 
