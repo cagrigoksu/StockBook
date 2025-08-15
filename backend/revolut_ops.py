@@ -25,7 +25,6 @@ def saveStatementData(file):
             print(f"Skipping unknown transaction type: {raw_type}")
             continue
 
-        # Parse numeric values safely
         def parse_float(value):
             if isinstance(value, float) or isinstance(value, int):
                 return float(value)
