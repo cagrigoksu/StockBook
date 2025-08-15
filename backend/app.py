@@ -36,6 +36,13 @@ def get_portfolio():
     if not user_id:
         return jsonify([])
     return jsonify(do.get_portfolio_by_user(user_id))
+
+@app.route("/api/performance", methods=["GET"])
+def get_performace_data():
+    user_id = session.get("user_id")
+    if not user_id:
+        return jsonify([])
+    return jsonify(do.get_performance_data_by_user(user_id))
     
 @app.route("/api/transactions", methods=["GET"])
 def get_transactions():
@@ -51,13 +58,17 @@ def add_transaction():
         return jsonify({"error": "User not selected"}), 400
 
     data = request.json
+    remaining_quantity = data["quantity"] if TransactionTypeEnum[data["transaction_type"]] == TransactionTypeEnum.BUY else 0
+        
     tx = Transaction(
         stock_symbol = data["stock_symbol"],
         transaction_type = TransactionTypeEnum[data["transaction_type"]],
         quantity = data["quantity"],
-        price_per_share = data["price_per_share"],
+        remaining_quantity = remaining_quantity,
         fee = data["fee"],
-        transaction_date = datetime.fromisoformat(data["transaction_date"])
+        price_per_share = data["price_per_share"],
+        transaction_date = datetime.fromisoformat(data["transaction_date"]),
+        pnl = 0
     )
     do.save_transaction(tx, int(user_id))
     return jsonify({"status": "saved"})

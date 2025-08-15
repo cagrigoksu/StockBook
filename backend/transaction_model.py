@@ -13,9 +13,11 @@ class TransactionTypeEnum(Enum):
 class Transaction:
     stock_symbol: str      
     transaction_type: TransactionTypeEnum
-    quantity: float         
+    quantity: float     
+    remaining_quantity: float    
     price_per_share: float 
     fee: float
+    pnl: float
     transaction_date: datetime 
 
     def to_db_tuple(self, user_id: int):
@@ -26,11 +28,13 @@ class Transaction:
             self.stock_symbol,
             self.transaction_type.value,
             self.quantity,
+            self.remaining_quantity,
             self.fee,
             self.price_per_share,
             dirty_price_per_share,
-            cost_of_shares,    
+            cost_of_shares,
             total_cost,
+            self.pnl,
             user_id,
             self.transaction_date.isoformat()
         )

@@ -38,11 +38,13 @@ def create_transactions_table():
             stock_symbol TEXT NOT NULL,
             transaction_type TEXT NOT NULL,
             quantity REAL NOT NULL,
+            remaining_quantity Real NOT NULL,
             fee REAL NOT NULL,
             price_per_share REAL NOT NULL,
             dirty_price_per_share REAL NOT NULL,  
             cost_of_shares REAL NOT NULL,         
             total_cost REAL NOT NULL,
+            pnl REAL NOT NULL,
             user_id INTEGER NOT NULL,
             transaction_date TEXT NOT NULL,
             FOREIGN KEY(user_id) REFERENCES users(id)
@@ -51,24 +53,81 @@ def create_transactions_table():
     conn.commit()
     conn.close()
 
+def get_last_price(symbol):
+    ticker = yf.Ticker(symbol)
+    data = ticker.history(period="1d", interval="1m")
+    return round(data['Close'].iloc[-1], 2)
+
 #* save transaction
 def save_transaction(transaction: Transaction, user_id: int):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
+
     cursor.execute("""
         INSERT INTO transactions (
             stock_symbol,
             transaction_type,
             quantity,
+            remaining_quantity,
             fee,
             price_per_share,
             dirty_price_per_share,
             cost_of_shares,    
             total_cost,
+            pnl,
             user_id,
             transaction_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, transaction.to_db_tuple(user_id))
+
+    last_id = cursor.lastrowid  
+
+    if transaction.transaction_type.value == TransactionTypeEnum.SELL.value: 
+        qty_to_sell = transaction.quantity
+        total_pnl = 0.0
+
+        cursor.execute("""
+            SELECT id, remaining_quantity, price_per_share, fee
+            FROM transactions
+            WHERE user_id = ? 
+              AND stock_symbol = ? 
+              AND transaction_type = ?
+              AND remaining_quantity > 0
+            ORDER BY id ASC
+        """, (user_id, transaction.stock_symbol, TransactionTypeEnum.BUY.value))  
+
+        buy_rows = cursor.fetchall()
+
+        for buy_id, remaining, buy_price, buy_fee in buy_rows:  
+            if qty_to_sell <= 0:
+                break
+
+            qty_deduct = min(remaining, qty_to_sell)
+            new_remaining = remaining - qty_deduct
+
+            cursor.execute("""
+                UPDATE transactions
+                SET remaining_quantity = ?
+                WHERE id = ?
+            """, (new_remaining, buy_id))
+
+            buy_fee_per_share = buy_fee / remaining if remaining else 0  
+            sell_fee_per_share = transaction.fee / transaction.quantity  
+            lot_pnl = qty_deduct * (
+                (transaction.price_per_share - sell_fee_per_share) -
+                (buy_price + buy_fee_per_share)
+            )  
+
+            total_pnl += lot_pnl  
+
+            qty_to_sell -= qty_deduct
+
+        cursor.execute("""
+            UPDATE transactions
+            SET pnl = ?
+            WHERE id = ?
+        """, (total_pnl, last_id))
+
     conn.commit()
     conn.close()
 
@@ -85,7 +144,7 @@ def get_users():
 def get_transactions_by_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
-    cursor.execute("SELECT stock_symbol, transaction_type, quantity, fee, price_per_share, total_cost, transaction_date FROM transactions WHERE user_id=? ORDER BY transaction_date DESC", (user_id,))
+    cursor.execute("SELECT stock_symbol, transaction_type, quantity, remaining_quantity, fee, price_per_share, total_cost, transaction_date FROM transactions WHERE user_id=? ORDER BY id DESC", (user_id,))
     rows = cursor.fetchall()
     conn.close()
     return [
@@ -93,106 +152,114 @@ def get_transactions_by_user(user_id):
             "stock_symbol": row[0],
             "transaction_type": row[1],
             "quantity": row[2],
-            "fee": round(row[3],2),
-            "price_per_share": row[4],
-            "total_cost": row[5],
-            "transaction_date": row[6]
+            "remaining_quantity": row[3],
+            "fee": round(row[4],2),
+            "price_per_share": row[5],
+            "total_cost": row[6],
+            "transaction_date": row[7]
         } for row in rows
     ]
+
+def get_performance_data_by_user(user_id):
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute(
+        """select stock_symbol, transaction_type, quantity, remaining_quantity, fee, price_per_share, pnl
+        from transactions
+        where user_id = ? order by id asc
+        """, user_id)
+    
+    rows = cursor.fetchall()
+    conn.close()
+    
+    total_fee = 0.0
+    total_realized_profit = 0.0
+    total_realized_loss = 0.0
+    total_unrealized_profit = 0.0
+    total_unrealized_loss = 0.0
+    
+    for r in rows:
+        symbol = r[0]
+        qty = r[2]
+        fee = r[5]
+        total_fee += fee
+        
+        realized_return = r[6]
+        if realized_return > 0:
+            total_realized_profit += realized_return
+        else:
+            total_realized_loss += abs(realized_return)
+            
+        last_price = get_last_price(symbol)
+            
+        current_value = qty * last_price
+        
+        if current_value > 0:
+            total_unrealized_profit += current_value
+        else:
+            total_unrealized_loss += abs(current_value)
+            
+    response = {
+        "total_fee": round(total_fee,2),
+        "total_realized_profit": round(total_realized_profit,2),
+        "total_realized_loss": round(total_realized_loss,2),
+        "total_unrealized_profit": round(total_unrealized_profit,2),
+        "total_unrealized_loss": round(total_unrealized_loss,2)
+    }
+    
+    return response    
 
 #* get portfolio by user
 def get_portfolio_by_user(user_id):
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT stock_symbol, transaction_type, quantity, fee, transaction_date, price_per_share "
-        "FROM transactions WHERE user_id=? and transaction_type!=? ORDER BY transaction_date ASC",
+        "SELECT stock_symbol, transaction_type, quantity, remaining_quantity, fee, transaction_date, price_per_share, pnl "
+        "FROM transactions WHERE user_id=? AND transaction_type!=? ORDER BY id ASC",
         (user_id, TransactionTypeEnum.DIVIDEND.value)
     )
     rows = cursor.fetchall()
     conn.close()
 
-    result = [
-        {
-            "stock_symbol": row[0],
-            "transaction_type": row[1],
-            "quantity": row[2],
-            "fee": row[3],
-            "transaction_date": row[4],
-            "price_per_share": row[5]
-        } for row in rows
-    ]
-
     stocks = {}
-    init_value = []  # FIFO buy lots with outstanding qty
 
-    for item in result:
-        symbol = item["stock_symbol"]
-        qty = item["quantity"]
+    for row in rows:
+        symbol = row[0]
+        transaction_type = row[1]
+        quantity = row[2]
+        fee = row[4]
+        pnl = row[7]
 
         if symbol not in stocks:
             stocks[symbol] = {'quantity': 0, 'realized': 0, 'total_fee': 0}
 
-        if item["transaction_type"] == TransactionTypeEnum.BUY.value:
-            stocks[symbol]['quantity'] += qty
-            stocks[symbol]['total_fee'] += item['fee']
-            init_value.append({
-                'stock_symbol': symbol,
-                'outstd_quantity': qty,
-                'price_per_share': item['price_per_share']
-            })
+        if transaction_type == TransactionTypeEnum.BUY.value:
+            stocks[symbol]['quantity'] += quantity
+            stocks[symbol]['total_fee'] += fee
 
-        elif item["transaction_type"] == TransactionTypeEnum.SELL.value:
-            stocks[symbol]['total_fee'] += item['fee']
-            stocks[symbol]['quantity'] -= qty
-
-            remaining_to_sell = qty
-            realized_gain = 0.0
-
-            for buy in init_value:
-                if buy['stock_symbol'] == symbol and remaining_to_sell > 0:
-                    qty_from_buy = min(buy['outstd_quantity'], remaining_to_sell)
-                    if qty_from_buy > 0:
-                        buy['outstd_quantity'] -= qty_from_buy
-                        remaining_to_sell -= qty_from_buy
-
-                        realized_gain += qty_from_buy * (item['price_per_share'] - buy['price_per_share'])
-
-            stocks[symbol]['realized'] += realized_gain
-
-        # remove fully sold stocks (quantity == 0)
-        stocks = {
-            sym: data for sym, data in stocks.items()
-            if not math.isclose(data['quantity'], 0.0, abs_tol=1e-10)
-        }
-
-    fifo_totals = {}
-    for entry in init_value:
-        if entry['outstd_quantity'] > 0:
-            symbol = entry['stock_symbol']
-            value = entry['outstd_quantity'] * entry['price_per_share']
-            fifo_totals[symbol] = fifo_totals.get(symbol, 0) + value
+        elif transaction_type == TransactionTypeEnum.SELL.value:
+            stocks[symbol]['quantity'] -= quantity
+            stocks[symbol]['realized'] += pnl
+            stocks[symbol]['total_fee'] += fee
 
     response = []
     for symbol, data in stocks.items():
         try:
-            ticker = yf.Ticker(symbol)
-            last_price = ticker.analyst_price_targets['current']
+            last_price = get_last_price(symbol)
             current_value = data['quantity'] * last_price
         except Exception as e:
             print(f"Error fetching data for {symbol}: {e}")
             last_price = 0
-            current_value = data['quantity'] * last_price
+            current_value = 0
 
         response.append({
             "stock_symbol": symbol,
             "quantity": round(data['quantity'], 5),
             "last_price": round(last_price, 2),
-            "initial_value": round(fifo_totals.get(symbol, 0), 2),
             "current_value": round(current_value, 2),
-            "pl": round(data['realized'] + (current_value - fifo_totals.get(symbol, 0)), 2),
+            "pl": round(data['realized'] + current_value, 2),  # use stored pnl
             "realized": round(data['realized'], 2),
-            "unrealized": round(current_value - fifo_totals.get(symbol, 0), 2),
+            "unrealized": round(current_value, 2),
             "total_fee": round(data['total_fee'], 2),
         })
 

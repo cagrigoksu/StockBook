@@ -5,6 +5,7 @@ import API from "../api";
 function Dashboard() {
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [performance, setPerformance] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
 
   const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
@@ -25,6 +26,10 @@ function Dashboard() {
   const fetchPortfolio = () => {
     API.get("/portfolio").then((res) => setPortfolio(res.data));
   };
+
+  const fetchPerformanceData = () => {
+    API.get("/performance").then((res) => setPerformance(res.data));
+  }
 
   const fetchTransactions = () => {
     API.get("/transactions").then((res) => setTransactions(res.data));
@@ -52,6 +57,7 @@ function Dashboard() {
   useEffect(() => {
     if (!userId) return navigate("/");
     fetchPortfolio();
+    fetchPerformanceData();
     fetchTransactions();
   }, [userId, navigate]);
 
@@ -85,6 +91,7 @@ function Dashboard() {
 
       alert(res.data.message || "Upload succeeded!");
       fetchPortfolio();
+      fetchPerformanceData();
       fetchTransactions(); // Reload table data
     } catch (err) {
       console.error(err);
@@ -133,7 +140,6 @@ function Dashboard() {
                     <th className="px-4 py-2 text-left">Symbol</th>
                     <th className="px-4 py-2">Quantity</th>
                     <th className="px-4 py-2">Last Price</th>
-                    <th className="px-4 py-2">Cost of Shares</th>
                     <th className="px-4 py-2">Current Value</th>
                     <th className="px-4 py-2">Profit/Loss</th>
                     <th className="px-4 py-2">Realized</th>
@@ -174,7 +180,6 @@ function Dashboard() {
                       <td className="px-4 py-2 font-medium text-gray-800">{p.stock_symbol}</td>
                       <td className="text-center">{p.quantity}</td>
                       <td className="text-center">{p.last_price}</td>
-                      <td className="text-center">{p.initial_value}</td>
                       <td className="text-center">{p.current_value}</td>
                       <td className="text-center">{p.pl}</td>
                       <td className="text-center">{p.realized}</td>
@@ -191,10 +196,66 @@ function Dashboard() {
 
         {/* Performance Tab */}
         {activeTab === 1 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Performance</h2>
-            <p>This is the performance tab content.</p>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-6">Performance</h2>
+
+          <div className="flex flex-col gap-8 border-2 border-gray-400 rounded-lg p-8 bg-gray-50">
+
+            {/* Profit & Loss Section */}
+            <div className="flex flex-col md:flex-row gap-6">
+
+              {/* Realized */}
+              <div className="flex-1 border-2 border-black rounded-lg p-6 flex flex-col justify-between">
+                <div className="flex justify-between mb-4">
+                  <div className="text-center flex-1 mx-2">
+                    <h2 className="text-xl text-green-800 font-semibold">Total Realized Profit</h2>
+                    <p className="text-xl mt-2">{performance.total_realized_profit}</p>
+                  </div>
+                  <div className="text-center flex-1 mx-2">
+                    <h2 className="text-xl text-red-800 font-semibold">Total Realized Loss</h2>
+                    <p className="text-xl mt-2">{performance.total_realized_loss}</p>
+                  </div>
+                </div>
+                <div className="text-center mt-4 p-2 border-t border-black">
+                  <h2 className="text-xl font-semibold">Overall Performance</h2>
+                  <p className="text-xl mt-2">{(performance.total_realized_profit-performance.total_realized_loss).toFixed(2)}</p>
+                </div>
+              </div>
+
+              {/* Unrealized */}
+              <div className="flex-1 border-2 border-black rounded-lg p-6 flex flex-col justify-between">
+                <div className="flex justify-between mb-4">
+                  <div className="text-center flex-1 mx-2">
+                    <h2 className="text-xl text-green-800 font-semibold">Total Unrealized Profit</h2>
+                    <p className="text-xl mt-2">{performance.total_unrealized_profit}</p>
+                  </div>
+                  <div className="text-center flex-1 mx-2">
+                    <h2 className="text-xl text-red-800 font-semibold">Total Unrealized Loss</h2>
+                    <p className="text-xl mt-2">{performance.total_unrealized_loss}</p>
+                  </div>
+                </div>
+                <div className="text-center mt-4 p-2 border-t border-black">
+                  <h2 className="text-xl font-semibold">Overall Performance</h2>
+                  <p className="text-xl mt-2">{(performance.total_unrealized_profit-performance.total_unrealized_loss)}</p>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Other Metrics */}
+            <div className="border-2 border-black rounded-lg p-6 bg-white">
+              <h2 className="text-2xl font-semibold mb-4">Other Metrics</h2>
+              <div className="flex flex-wrap gap-4">
+                <div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
+                  <h2 className="text-xl text-black font-medium">Total Fee</h2>
+                  <p className="text-xl mt-2">{performance.total_fee}</p>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
+
         )}
 
         {/* Transactions Tab */}
@@ -245,7 +306,7 @@ function Dashboard() {
                       key={idx}
                       className="even:bg-gray-100 hover:bg-blue-50 transition"
                     >
-                      <td className="pl-1 py-2">
+                      {t.transaction_type === "BUY" ? (<td className="pl-1 py-2">
                         <button
                           type="button"
                           className="bg-lime-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
@@ -255,7 +316,7 @@ function Dashboard() {
                             <path fill-rule="evenodd" d="M20.29 8.567c.133.323.334.613.59.85v.002a3.536 3.536 0 0 1 0 5.166 2.442 2.442 0 0 0-.776 1.868 3.534 3.534 0 0 1-3.651 3.653 2.483 2.483 0 0 0-1.87.776 3.537 3.537 0 0 1-5.164 0 2.44 2.44 0 0 0-1.87-.776 3.533 3.533 0 0 1-3.653-3.654 2.44 2.44 0 0 0-.775-1.868 3.537 3.537 0 0 1 0-5.166 2.44 2.44 0 0 0 .775-1.87 3.55 3.55 0 0 1 1.033-2.62 3.594 3.594 0 0 1 2.62-1.032 2.401 2.401 0 0 0 1.87-.775 3.535 3.535 0 0 1 5.165 0 2.444 2.444 0 0 0 1.869.775 3.532 3.532 0 0 1 3.652 3.652c-.012.35.051.697.184 1.02ZM9.927 7.371a1 1 0 1 0 0 2h.01a1 1 0 0 0 0-2h-.01Zm5.889 2.226a1 1 0 0 0-1.414-1.415L8.184 14.4a1 1 0 0 0 1.414 1.414l6.218-6.217Zm-2.79 5.028a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01Z" clip-rule="evenodd"/>
                           </svg>
                         </button>
-                      </td>
+                      </td>) : (<td className="pl-1 py-2"></td>)}
                       <td className="px-4 py-2 font-medium text-gray-800">{t.stock_symbol}</td>
                       <td 
                         className={`text-center font-semibold 
@@ -327,7 +388,7 @@ function Dashboard() {
 
               <div className="pl-2 pr-2.5">
 
-                <label className="text-red-800 block text-sm font-bold">5% Risk</label>
+                <label className="text-red-800 block text-sm font-bold">5% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.95)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
@@ -335,7 +396,7 @@ function Dashboard() {
                   value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.95).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-red-700 block text-sm font-bold">7% Risk</label>
+                <label className="text-red-700 block text-sm font-bold">7% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.93)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
@@ -343,12 +404,12 @@ function Dashboard() {
                   value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.93).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-red-600 block text-sm font-bold">10% Risk</label>
+                <label className="text-red-600 block text-sm font-bold">10% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.90)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 )).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.9).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
 
@@ -356,7 +417,7 @@ function Dashboard() {
 
               <div className="pl-2 pr-2.5">
 
-                <label className="text-green-800 block text-sm font-bold">5% Profit</label>
+                <label className="text-green-800 block text-sm font-bold">5% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.05)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
@@ -364,7 +425,7 @@ function Dashboard() {
                   value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.05).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-green-700 block text-sm font-bold">7% Profit</label>
+                <label className="text-green-700 block text-sm font-bold">7% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.07)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
@@ -372,7 +433,7 @@ function Dashboard() {
                   value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.07).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-green-600 block text-sm font-bold">10% Profit</label>
+                <label className="text-green-600 block text-sm font-bold">10% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.1)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"

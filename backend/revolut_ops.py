@@ -3,55 +3,72 @@ from transaction_model import Transaction, TransactionTypeEnum
 from db_ops import save_transaction
 import config
 import re
-from zoneinfo import ZoneInfo 
+from zoneinfo import ZoneInfo
 from dateutil import parser
 
 def saveStatementData(file):
-    
-    df = pd.read_csv(file)    
+    df = pd.read_csv(file)
     df = df.dropna(subset=['Ticker'])
 
-    for idx, row in df.iterrows():
+    type_map = {
+        'BUY - MARKET': TransactionTypeEnum.BUY,
+        'BUY - LIMIT': TransactionTypeEnum.BUY,
+        'SELL - MARKET': TransactionTypeEnum.SELL,
+        'SELL - LIMIT': TransactionTypeEnum.SELL,
+        'DIVIDEND': TransactionTypeEnum.DIVIDEND
+    }
 
-        if row['Type'] == 'DIVIDEND':
+    for idx, row in df.iterrows():
+        raw_type = row['Type']
+        transaction_type = type_map.get(raw_type)
+        if transaction_type is None:
+            print(f"Skipping unknown transaction type: {raw_type}")
+            continue
+
+        # Parse numeric values safely
+        def parse_float(value):
+            if isinstance(value, float) or isinstance(value, int):
+                return float(value)
+            return float(re.sub(r'[^\d\.]', '', str(value).replace(',', '')))
+
+        if transaction_type == TransactionTypeEnum.DIVIDEND:
             quantity = 1
-            pps = 0
-            #TODO : IMPORTANT FIX
-            #! total amount comes 0, transaction_model.py, line 21
-            total_amount = row['Total Amount'] if isinstance(row['Total Amount'], float)  else float(re.sub(r'[^\d\.]', '', row['Total Amount'].replace(',', '')))
-            fee_ = 0
-            taction_type = TransactionTypeEnum.DIVIDEND
+            remaining_quantity = 0
+            price_per_share = 0
+            total_amount = parse_float(row['Total Amount'])
+            fee = 0
+            pnl = total_amount  # store dividend received as pnl
         else:
-            quantity = row['Quantity']
-            pps = row['Price per share'] if isinstance(row['Price per share'], float)  else float(re.sub(r'[^\d\.]', '', row['Price per share'].replace(',', '')))
-            total_amount = row['Total Amount'] if isinstance(row['Total Amount'], float)  else float(re.sub(r'[^\d\.]', '', row['Total Amount'].replace(',', '')))
-            fee_ = total_amount - (quantity * pps)
-            taction_type = TransactionTypeEnum.BUY if row['Type'] == "BUY - MARKET" else TransactionTypeEnum.SELL
-            if row['Type'] == 'BUY - MARKET' or row['Type'] == 'BUY - LIMIT':
-                taction_type = TransactionTypeEnum.BUY
-            elif row['Type'] == 'SELL - MARKET' or row['Type'] == 'SELL - LIMIT':
-                taction_type = TransactionTypeEnum.SELL
-            
+            quantity = parse_float(row['Quantity'])
+            remaining_quantity = quantity if transaction_type == TransactionTypeEnum.BUY else 0
+            price_per_share = parse_float(row['Price per share'])
+            total_amount = parse_float(row['Total Amount'])
+            fee = abs(total_amount - (quantity * price_per_share))
+            pnl = 0
+
+        # parse date and convert to CET
         dt_utc = parser.parse(row['Date'])
         dt_cet = dt_utc.astimezone(ZoneInfo('Europe/Berlin'))
 
+        stock_symbol = row['Ticker']
+        symbol_map = {
+            "RHM": "RHM.DE",
+            "M0YN": "M0YN.F",
+            "SGM": "SGM.SG",
+            "DAU0": "DAU0.SG",
+        }
+        
+        stock_symbol = symbol_map.get(stock_symbol, stock_symbol)
+
         tx = Transaction(
-            stock_symbol=row['Ticker'],
-            quantity= quantity,
-            price_per_share= pps,
-            transaction_type= taction_type,
-            fee= fee_,
+            stock_symbol=stock_symbol,
+            quantity=quantity,
+            remaining_quantity=remaining_quantity,
+            price_per_share=price_per_share,
+            transaction_type=transaction_type,
+            pnl=pnl,
+            fee=fee,
             transaction_date=dt_cet
         )
-        
-        #TODO : optimize here
-        if tx.stock_symbol == "RHM":
-            tx.stock_symbol = "RHM.DE"   
-        
-        if tx.stock_symbol == "M0YN":
-            tx.stock_symbol = "M0YN.F"  
-        
-        if tx.stock_symbol == "SGM":
-            tx.stock_symbol = "SGM.SG"        
-        
+
         save_transaction(tx, config.USER_ID)
