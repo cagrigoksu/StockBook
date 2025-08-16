@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 import API from "../../../api";
 
@@ -48,6 +49,7 @@ export default function PortfolioTabComponent({portfolio})
     const [chartData, setChartData] = useState(null);
 
     return (
+      <>
         <div className="portfolio-table-component">
             <div className="flex flex-wrap items-center mb-4 gap-4">
               
@@ -152,6 +154,7 @@ export default function PortfolioTabComponent({portfolio})
               />
             )} 
         </div>
+        </>
 );
 
 }

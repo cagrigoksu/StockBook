@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 import TransactionsRowRiskProfModalComponent from "./TransactionsRowRiskProfModalComponent";
 
@@ -32,6 +33,7 @@ export default function TransactionsTabComponent({
     }
 
     return (
+      <>
             <div className="h-full">
               <div className="flex flex-col h-[calc(100vh-180px)]">
                 <div className="flex justify-between items-center mb-4">
@@ -142,6 +144,7 @@ export default function TransactionsTabComponent({
             )}
             
             </div>
+            </>
 
           
     );

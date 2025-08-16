@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api";
 
+import { Helmet } from "react-helmet";
+
 import SpinnerComponent from "../common/SpinnerComponent";
 
 import LogoComponent from "../common/LogoComponent";
@@ -88,7 +90,12 @@ function Dashboard() {
   const tabs = ["Overview", "Performance", "Transactions"];
 
   return (
+    <>
+    <Helmet>
+        <title>StockBook | Dashboard</title>
+    </Helmet>
     <div className="min-h-screen bg-gray-100 pt-2">
+    
       <div className="max-w-7xl mx-auto">
 
         <div className="flex justify-between items-center mb-4">
@@ -144,6 +151,7 @@ function Dashboard() {
       </div>
 
     </div>
+    </>
   );
 }
 

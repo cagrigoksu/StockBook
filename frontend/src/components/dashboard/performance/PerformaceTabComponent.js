@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet";
 
 export default function PerformanceTabComponent({ performance }) {
   // Helper function to format currency
@@ -10,6 +11,7 @@ export default function PerformanceTabComponent({ performance }) {
   };
 
   return (
+    <>
     <div className="max-w-7xl h-full">
       <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">
         Performance Dashboard
@@ -123,5 +125,6 @@ export default function PerformanceTabComponent({ performance }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
