@@ -167,8 +167,8 @@ def get_performance_data_by_user(user_id):
     cursor.execute(
         """select stock_symbol, transaction_type, quantity, remaining_quantity, fee, price_per_share, pnl
         from transactions
-        where user_id = ? order by id asc
-        """, user_id)
+        where user_id = ? and transaction_type != ? order by id asc
+        """, (user_id, TransactionTypeEnum.DIVIDEND.value))
     
     rows = cursor.fetchall()
     conn.close()
@@ -178,15 +178,28 @@ def get_performance_data_by_user(user_id):
     total_realized_loss = 0.0
     total_unrealized_profit = 0.0
     total_unrealized_loss = 0.0
+    total_transactions = {"buy":0, "sell":0}
+    stocks = {}
+    epsilon = 1e-6
     
     for r in rows:
         symbol = r[0]
+        transaction_type = r[1]
         qty = r[2]
         remaining_qty = r[3]
         fee = r[4]
         pps = r[5]
         total_fee += fee
         
+        if symbol not in stocks:
+            stocks[symbol] = {'remaining_qty': 0}
+        else:
+            stocks[symbol]['remaining_qty'] += remaining_qty
+        
+        if transaction_type == TransactionTypeEnum.BUY.value:
+            total_transactions['buy'] += 1
+        elif transaction_type == TransactionTypeEnum.SELL.value:
+            total_transactions['sell'] += 1        
         
         realized_return = r[6]
         if realized_return > 0:
@@ -204,13 +217,19 @@ def get_performance_data_by_user(user_id):
                 total_unrealized_profit += unrealized
             else:
                 total_unrealized_loss += abs(unrealized)
+    
+    total_symbols = len(stocks)
+    symbols_with_zero_qty = sum(1 for s in stocks.values() if s['remaining_qty'] <= epsilon)
+    symbols_with_not_zero_qty = sum(1 for s in stocks.values() if s['remaining_qty'] > epsilon)
             
     response = {
         "total_fee": round(total_fee,2),
         "total_realized_profit": round(total_realized_profit,2),
         "total_realized_loss": round(total_realized_loss,2),
         "total_unrealized_profit": round(total_unrealized_profit,2),
-        "total_unrealized_loss": round(total_unrealized_loss,2)
+        "total_unrealized_loss": round(total_unrealized_loss,2),
+        "total_transactions": total_transactions,
+        "invested_stocks": {'total': total_symbols, "zero_stocks": symbols_with_zero_qty, "non_zero_stocks": symbols_with_not_zero_qty},
     }
     
     return response    
@@ -261,9 +280,7 @@ def get_portfolio_by_user(user_id):
     for symbol, data in stocks.items():
         try:
             last_price = get_last_price(symbol)
-            current_value = data['quantity'] * last_price
-            
-            
+            current_value = data['quantity'] * last_price            
             
         except Exception as e:
             print(f"Error fetching data for {symbol}: {e}")

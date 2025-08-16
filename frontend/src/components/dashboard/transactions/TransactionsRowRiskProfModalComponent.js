@@ -46,28 +46,28 @@ export default function TransactionsRowRiskProfModalComponent({
 
               <div className="pl-2 pr-2.5">
 
-                <label className="text-red-800 block text-sm font-bold">5% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.95)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-red-800 block text-sm font-bold">5% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.95)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.95).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.95).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-red-700 block text-sm font-bold">7% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.93)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-red-700 block text-sm font-bold">7% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.93)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.93).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.93).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-red-600 block text-sm font-bold">10% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.90)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-red-600 block text-sm font-bold">10% Risk @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.90)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*0.9).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*0.9).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
 
@@ -75,28 +75,28 @@ export default function TransactionsRowRiskProfModalComponent({
 
               <div className="pl-2 pr-2.5">
 
-                <label className="text-green-800 block text-sm font-bold">5% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.05)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-green-800 block text-sm font-bold">5% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.05)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.05).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.05).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-green-700 block text-sm font-bold">7% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.07)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-green-700 block text-sm font-bold">7% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.07)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.07).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.07).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
-                <label className="text-green-600 block text-sm font-bold">10% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.1)/selectedRowQty).toFixed(2))}</label>
+                <label className="text-green-600 block text-sm font-bold">10% Profit @{(((((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.1)/selectedRowQty).toFixed(2))}</label>
                 <input
                   type="number"
                   step="any"
                   readOnly
-                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? selectedRowFee : 0 ))*1.1).toFixed(2)}
+                  value={(((selectedRowPrice * selectedRowQty)+ (checkboxTrRowRiskProfModal ? (selectedRowFee*2) : 0 ))*1.1).toFixed(2)}
                   className="mt-1 px-3 py-2 mb-3 border rounded-xl"
                 />
 

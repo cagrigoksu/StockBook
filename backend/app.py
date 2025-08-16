@@ -3,12 +3,13 @@ from flask_cors import CORS
 import db_ops as do
 from transaction_model import Transaction, TransactionTypeEnum
 from revolut_ops import saveStatementData
-from datetime import datetime
+from datetime import datetime, timedelta
 import config
 import os
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
+app.permanent_session_lifetime = timedelta(minutes=10)
 CORS(app, supports_credentials=True)
 
 do.db_prepare()

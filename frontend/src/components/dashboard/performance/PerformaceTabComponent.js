@@ -56,9 +56,19 @@ export default function PerformanceTabComponent({performance})
                     <h2 className="text-2xl font-semibold mb-4">Other Metrics</h2>
                     <div className="flex flex-wrap gap-4">
                         <div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
-                        <h2 className="text-xl text-black font-medium">Total Fee</h2>
-                        <p className="text-xl mt-2">{performance.total_fee}</p>
+                            <h2 className="text-xl text-black font-medium">Total Fee</h2>
+                            <p className="text-xl mt-2">{performance.total_fee}</p>
                         </div>
+
+                        <div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
+                            <h2 className="text-xl text-black font-medium">Total Transactions</h2>
+                            <p className="text-xl mt-2">Buy: {performance.total_transactions.buy} - Sell: {performance.total_transactions.sell}</p>
+                        </div>
+
+                        {<div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
+                            <h2 className="text-xl text-black font-medium">Invested Stocks</h2>
+                            <p className="text-xl mt-2">Total: {performance.invested_stocks.total} - Owned: {performance.invested_stocks.non_zero_stocks} Sold: {performance.invested_stocks.zero_stocks}</p>
+                        </div> }
                     </div>
                     </div>
 
