@@ -5,9 +5,12 @@ import API from "../api";
 function Dashboard() {
   const [portfolio, setPortfolio] = useState([]);
   const [showAllPortfolio, setShowAllPortfolio] = useState(true);
-  const [searchSymbol, setSearchSymbol] = useState("");
+  const [searchSymbolPortfolio, setSearchSymbolPortfolio] = useState("");
 
   const [transactions, setTransactions] = useState([]);
+  const [searchSymbolTransactions, setSearchSymbolTransactions] = useState("");
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState("ALL");
+
   const [performance, setPerformance] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -144,10 +147,10 @@ function Dashboard() {
                   onChange={(e) => setShowAllPortfolio(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer dark:bg-gray-700 
                   peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                   after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
-                  peer-checked:bg-blue-600 relative"
+                  peer-checked:bg-teal-700 relative"
                 ></div>
                 <span className="ml-3 text-sm font-medium text-gray-900">
                   Show all portfolio
@@ -158,9 +161,9 @@ function Dashboard() {
               <input
                 type="text"
                 placeholder="Search symbol..."
-                value={searchSymbol}
-                onChange={(e) => setSearchSymbol(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                value={searchSymbolPortfolio}
+                onChange={(e) => setSearchSymbolPortfolio(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
               />
             </div>
 
@@ -182,7 +185,7 @@ function Dashboard() {
                 </thead>
                 <tbody>
                   {portfolio.filter(p => showAllPortfolio || p.quantity > 0)
-                  .filter(p => p.stock_symbol.toLowerCase().includes(searchSymbol.toLowerCase()))
+                  .filter(p => p.stock_symbol.toLowerCase().includes(searchSymbolPortfolio.toLowerCase()))
                   .map((p, idx) => (
                     <tr
                       key={idx}
@@ -321,6 +324,25 @@ function Dashboard() {
               </div>
             </div>
 
+            <div className="flex flex-row">      
+              <input type="text" placeholder="Search symbol..." 
+                value={searchSymbolTransactions} onChange={(e)=> setSearchSymbolTransactions(e.target.value)}
+                className="mb-5 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400">
+              </input>
+
+              <select
+                value={transactionTypeFilter}
+                onChange={(e) => setTransactionTypeFilter(e.target.value)}
+                className="mb-5 ml-5 px-3 py-2 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block"
+              >
+                <option value="ALL">All types</option>
+                <option value="BUY">Buy</option>
+                <option value="SELL">Sell</option>
+                <option value="DIVIDEND">Dividend</option>
+              </select>
+
+            </div>
+
             <div className="overflow-y-auto flex-grow rounded-xl shadow bg-white mb-8">
               <table className="min-w-full text-sm">
                 <thead className="bg-gray-800 text-white sticky top-0">
@@ -336,7 +358,10 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((t, idx) => (
+                  {transactions
+                  .filter(t => t.stock_symbol.toLowerCase().includes(searchSymbolTransactions.toLowerCase()))
+                  .filter(t => transactionTypeFilter === "ALL" || t.transaction_type === transactionTypeFilter)
+                  .map((t, idx) => (
                     <tr
                       key={idx}
                       className="even:bg-gray-100 hover:bg-blue-50 transition"
@@ -378,7 +403,44 @@ function Dashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-96 p-6">
             <h2 className="text-xl font-semibold mb-4">{selectedPoRowSymbol ? `${selectedPoRowSymbol} Details` : "Details"}</h2>
-            <p>Body.</p>
+
+            <div class="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 md:p-6">
+              <div class="flex justify-between">
+                <div>
+                  <h5 class="leading-none text-3xl font-bold text-gray-900 pb-2">32.4k</h5>
+                  <p class="text-base font-normal text-gray-500 dark:text-gray-400">Trend of {selectedPoRowSymbol}</p>
+                </div>
+                <div
+                  class="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
+                  12%
+                  <svg class="w-3 h-3 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13V1m0 0L1 5m4-4 4 4"/>
+                  </svg>
+                </div>
+              </div>
+              <div id="area-chart">
+                
+              </div>
+              <div class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between">
+                <div class="flex justify-between items-center pt-5">
+
+                  <button
+                    id="dropdownDefaultButton"
+                    data-dropdown-toggle="lastDaysdropdown"
+                    data-dropdown-placement="bottom"
+                    class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
+                    type="button">
+                    Last 7 days
+                    <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
+
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setShowPoRowDetailsModal(false)}
