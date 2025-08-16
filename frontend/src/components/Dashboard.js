@@ -74,7 +74,7 @@ function Dashboard() {
   const tabs = ["Overview", "Performance", "Transactions"];
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
+    <div className="min-h-screen bg-gray-100 pt-2">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <LogoComponent />
@@ -83,7 +83,7 @@ function Dashboard() {
         {/* tabs header */}
         <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Overview Tab */}
+        {/* Portfolio Tab */}
         {activeTab === 0 && (
           <div className="flex flex-col h-[calc(100vh-180px)]">
             <div className="flex justify-between items-center mb-4">

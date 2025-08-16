@@ -78,7 +78,7 @@ export default function TransactionsTabComponent({
     
                 </div>
     
-                <div className="overflow-y-auto flex-grow rounded-xl shadow bg-white mb-8">
+                <div className="overflow-y-auto max-h-[55vh] flex-grow rounded-xl shadow bg-white mb-8">
                   <table className="min-w-full text-sm">
                     <thead className="bg-gray-800 text-white sticky top-0">
                       <tr>

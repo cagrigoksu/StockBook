@@ -10,12 +10,12 @@ export default function PerformanceTabComponent({ performance }) {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6  min-h-screen">
+    <div className="max-w-7xl">
       <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">
         Performance Dashboard
       </h2>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="overflow-x-auto max-h-[60vh] pr-3 grid gap-6 lg:grid-cols-2">
         {/* Realized Profit/Loss Card */}
         <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
           <h3 className="text-xl font-semibold text-gray-900 mb-6">
@@ -116,7 +116,7 @@ export default function PerformanceTabComponent({ performance }) {
                 Invested Stocks
               </h4>
               <p className="text-xl font-medium text-gray-900 mt-2">
-                Total: {performance.invested_stocks.total} • Owned: {performance.invested_stocks.non_zero_stocks} • Sold: {performance.invested_stocks.zero_stocks}
+                Total: {performance.invested_stocks.total} • Own: {performance.invested_stocks.non_zero_stocks} • Sold: {performance.invested_stocks.zero_stocks}
               </p>
             </div>
           </div>
