@@ -1,12 +1,37 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 
 function Dashboard() {
   const [portfolio, setPortfolio] = useState([]);
   const [showAllPortfolio, setShowAllPortfolio] = useState(true);
   const [searchSymbolPortfolio, setSearchSymbolPortfolio] = useState("");
   const [portfolioRowData, setPortfolioRowData] = useState({})
+  const [chartData, setChartData] = useState(null);
 
   const [transactions, setTransactions] = useState([]);
   const [searchSymbolTransactions, setSearchSymbolTransactions] = useState("");
@@ -43,12 +68,29 @@ function Dashboard() {
   };
 
   const fetchPortfolioRowData = (symbol) => {
-    return API.get(`/portfolioRowDetail?symbol=${symbol}`).then((res) => setPortfolioRowData(res.data))
+    return API.get(`/portfolioRowDetail?symbol=${symbol}`).then((res) => {
+      setPortfolioRowData(res.data);
+      
+      setChartData({
+          labels: res.data.stockDailyCloseValues.map(d => new Date(d.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})),
+          datasets: [
+            {
+              label: `${symbol} Price`,
+              data: res.data.stockDailyCloseValues.map(d => d.close),
+              fill: true,
+              backgroundColor: "rgba(249, 105, 29, 0.36)", 
+              borderColor: "rgba(249, 105, 29, 1)",
+              tension: 0.1,
+            }
+          ]
+        });
+    })
   }
 
   const handlePoRowDetailsButton = (symbol) => {
     setSelectedPoRowSymbol(symbol);
-    fetchPortfolioRowData(symbol).then(() => setShowPoRowDetailsModal(true));
+    fetchPortfolioRowData(symbol).then(() => 
+      setShowPoRowDetailsModal(true));
   }
 
   const handleTrRowRiskProfButton = (symbol, qty, price, fee) => {
@@ -431,8 +473,8 @@ function Dashboard() {
                 
               </div>
 
-              <div id="area-chart">
-                
+              <div id="area-chart" className="h-48">
+                {chartData ? <Line data={chartData} options={{responsive: true, plugins:{legend:{display:false}}}} /> : "Loading chart..."}
               </div>
 
 
