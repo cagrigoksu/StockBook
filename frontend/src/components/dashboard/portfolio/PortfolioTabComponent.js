@@ -1,15 +1,51 @@
-import React from "react";
+import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 
+import API from "../../../api";
 
-export default function PortfolioTabComponent({
-    showAllPortfolio, setShowAllPortfolio, 
-    searchSymbolPortfolio, setSearchSymbolPortfolio, 
-    portfolio,
-    handlePoRowDetailsButton}) 
+import PortfolioRowDetailsModalComponent from "./PortfolioRowDetailsModalComponent";
+
+
+export default function PortfolioTabComponent({portfolio}) 
     {
+
+    const handlePoRowDetailsButton = (symbol) => {
+      setSelectedPoRowSymbol(symbol);
+      fetchPortfolioRowData(symbol).then(() => 
+      setShowPoRowDetailsModal(true));
+    }
+
+
+
+    const fetchPortfolioRowData = (symbol) => {
+      return API.get(`/portfolioRowDetail?symbol=${symbol}`).then((res) => {
+        setPortfolioRowData(res.data);
+        
+        setChartData({
+            labels: res.data.stockDailyCloseValues.map(d => new Date(d.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})),
+            datasets: [
+              {
+                label: `${symbol} Price`,
+                data: res.data.stockDailyCloseValues.map(d => d.close),
+                fill: true,
+                backgroundColor: "rgba(249, 105, 29, 0.36)", 
+                borderColor: "rgba(249, 105, 29, 1)",
+                tension: 0.1,
+              }
+            ]
+          });
+      })
+    }
+
+
+    const [showAllPortfolio, setShowAllPortfolio] = useState(true);
+    const [searchSymbolPortfolio, setSearchSymbolPortfolio] = useState("");
     
     const navigate = useNavigate();
+    const [selectedPoRowSymbol, setSelectedPoRowSymbol] = useState("");
+    const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
+    const [portfolioRowData, setPortfolioRowData] = useState({})
+    const [chartData, setChartData] = useState(null);
 
     return (
         <div className="portfolio-table-component">
@@ -26,7 +62,7 @@ export default function PortfolioTabComponent({
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer dark:bg-gray-700 
                     peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                     after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
-                    peer-checked:bg-teal-700 relative"
+                    peer-checked:bg-amber-700 relative"
                     ></div>
                     <span className="ml-3 text-sm font-medium text-gray-900">
                     Show sold stocks
@@ -105,6 +141,15 @@ export default function PortfolioTabComponent({
                 </tbody>
               </table>
             </div>
+
+            {showPoRowDetailsModal && (
+              <PortfolioRowDetailsModalComponent 
+                selectedPoRowSymbol = {selectedPoRowSymbol}
+                portfolioRowData = {portfolioRowData}
+                chartData = {chartData}
+                setShowPoRowDetailsModal = {setShowPoRowDetailsModal}  
+              />
+            )} 
         </div>
 );
 

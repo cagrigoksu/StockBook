@@ -38,7 +38,7 @@ export default function TransactionsTabComponent({
                   <h1 className="text-3xl font-bold text-gray-800">Your Transactions</h1>
                   <div className="space-x-2">
                     <button
-                      className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
+                      className="bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition"
                       onClick={() => navigate("/add-stock")}
                     >
                       Add Stock

@@ -5,8 +5,8 @@ export default function PerformanceTabComponent({performance})
 
     return (
         <div>
-            <div className="p-6">
-                <h2 className="text-2xl font-bold mb-6">Performance</h2>
+            <div className="">
+                <h2 className="text-3xl font-bold text-gray-800 mb-6">Performance</h2>
 
                 <div className="flex flex-col gap-8 border-2 border-gray-400 rounded-lg p-8 bg-gray-50">
 

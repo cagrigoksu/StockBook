@@ -4,16 +4,16 @@ import API from "../api";
 
 import TabsHeaderComponent from "./dashboard/TabsHeaderComponent";
 import PortfolioTabComponent from "./dashboard/portfolio/PortfolioTabComponent";
-import PortfolioRowDetailsModalComponent from "./dashboard/portfolio/PortfolioRowDetailsModalComponent";
 import PerformanceTabComponent from "./dashboard/performance/PerformaceTabComponent";
 import TransactionsTabComponent from "./dashboard/transactions/TransactionsTabComponent";
 
 function Dashboard() {
+
   const [portfolio, setPortfolio] = useState([]);
-  const [showAllPortfolio, setShowAllPortfolio] = useState(true);
-  const [searchSymbolPortfolio, setSearchSymbolPortfolio] = useState("");
-  const [portfolioRowData, setPortfolioRowData] = useState({})
-  const [chartData, setChartData] = useState(null);
+
+  const fetchPortfolio = () => {
+      API.get("/portfolio").then((res) => setPortfolio(res.data));
+    };
 
   const [transactions, setTransactions] = useState([]);
   const [searchSymbolTransactions, setSearchSymbolTransactions] = useState("");
@@ -22,19 +22,9 @@ function Dashboard() {
   const [performance, setPerformance] = useState([]);
   const [activeTab, setActiveTab] = useState(0);
 
-  const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
-
-  const [selectedPoRowSymbol, setSelectedPoRowSymbol] = useState("");
-
-
-
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const userId = localStorage.getItem("user_id");
-
-  const fetchPortfolio = () => {
-    API.get("/portfolio").then((res) => setPortfolio(res.data));
-  };
 
   const fetchPerformanceData = () => {
     API.get("/performance").then((res) => setPerformance(res.data));
@@ -43,32 +33,6 @@ function Dashboard() {
   const fetchTransactions = () => {
     API.get("/transactions").then((res) => setTransactions(res.data));
   };
-
-  const fetchPortfolioRowData = (symbol) => {
-    return API.get(`/portfolioRowDetail?symbol=${symbol}`).then((res) => {
-      setPortfolioRowData(res.data);
-      
-      setChartData({
-          labels: res.data.stockDailyCloseValues.map(d => new Date(d.datetime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})),
-          datasets: [
-            {
-              label: `${symbol} Price`,
-              data: res.data.stockDailyCloseValues.map(d => d.close),
-              fill: true,
-              backgroundColor: "rgba(249, 105, 29, 0.36)", 
-              borderColor: "rgba(249, 105, 29, 1)",
-              tension: 0.1,
-            }
-          ]
-        });
-    })
-  }
-
-  const handlePoRowDetailsButton = (symbol) => {
-    setSelectedPoRowSymbol(symbol);
-    fetchPortfolioRowData(symbol).then(() => 
-      setShowPoRowDetailsModal(true));
-  }
 
   useEffect(() => {
     if (!userId) return navigate("/");
@@ -133,14 +97,7 @@ function Dashboard() {
               <h1 className="text-3xl font-bold text-gray-800">Your Portfolio</h1>
             </div>
 
-            <PortfolioTabComponent 
-              showAllPortfolio={showAllPortfolio}
-              setShowAllPortfolio={setShowAllPortfolio}
-              searchSymbolPortfolio={searchSymbolPortfolio}
-              setSearchSymbolPortfolio={setSearchSymbolPortfolio}
-              portfolio={portfolio}
-              handlePoRowDetailsButton={handlePoRowDetailsButton}
-              />
+            <PortfolioTabComponent portfolio={portfolio}/>
 
           </div>
         )}
@@ -163,21 +120,11 @@ function Dashboard() {
         )}
       </div>
 
-      {/* PoRowDetailsModal */}
-      {showPoRowDetailsModal && (
-        <PortfolioRowDetailsModalComponent 
-          selectedPoRowSymbol = {selectedPoRowSymbol}
-          portfolioRowData = {portfolioRowData}
-          chartData = {chartData}
-          setShowPoRowDetailsModal = {setShowPoRowDetailsModal}  
-        />
-      )}
-
       {/* Logout Button */}
       <div className="fixed bottom-0 w-full bg-gray-200 p-4 flex justify-end">
 
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
+          className="bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 rounded mr-4"
           onClick={handleLogout}
         >
           Logout
