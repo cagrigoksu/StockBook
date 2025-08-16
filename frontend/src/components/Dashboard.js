@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 
+import LogoComponent from "./dashboard/LogoComponent";
+import TopMenuComponent from "./dashboard/TopMenuComponent";
+
 import TabsHeaderComponent from "./dashboard/TabsHeaderComponent";
 import PortfolioTabComponent from "./dashboard/portfolio/PortfolioTabComponent";
 import PerformanceTabComponent from "./dashboard/performance/PerformaceTabComponent";
@@ -41,19 +44,6 @@ function Dashboard() {
     fetchTransactions();
   }, [userId, navigate]);
 
-  const handleLogout = async () => {
-    try {
-      const response = await API.get("/user_logout");
-      if (response.data.status === "success") {
-        navigate("/");
-      } else {
-        console.error("Logout failed");
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
   const openFilePicker = () => fileInputRef.current?.click();
 
   const handleStatementUpload = async (e) => {
@@ -86,7 +76,10 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 py-10">
       <div className="max-w-7xl mx-auto">
-
+        <div className="flex justify-between items-center mb-4">
+          <LogoComponent />
+          <TopMenuComponent />
+        </div>
         {/* tabs header */}
         <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -120,17 +113,6 @@ function Dashboard() {
         )}
       </div>
 
-      {/* Logout Button */}
-      <div className="fixed bottom-0 w-full bg-gray-200 p-4 flex justify-end">
-
-        <button
-          className="bg-amber-800 hover:bg-amber-900 text-white px-4 py-2 rounded mr-4"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-
-      </div>
     </div>
   );
 }
