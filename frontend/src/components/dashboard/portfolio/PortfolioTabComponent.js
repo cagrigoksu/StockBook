@@ -1,0 +1,113 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
+
+export default function PortfolioTabComponent({
+    showAllPortfolio, setShowAllPortfolio, 
+    searchSymbolPortfolio, setSearchSymbolPortfolio, 
+    portfolio,
+    handlePoRowDetailsButton}) 
+    {
+    
+    const navigate = useNavigate();
+
+    return (
+        <div className="portfolio-table-component">
+            <div className="flex flex-wrap items-center mb-4 gap-4">
+              
+                {/* toggle */}
+                <label className="inline-flex items-center cursor-pointer">
+                    <input
+                    type="checkbox"
+                    checked={showAllPortfolio}
+                    onChange={(e) => setShowAllPortfolio(e.target.checked)}
+                    className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer dark:bg-gray-700 
+                    peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                    after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
+                    peer-checked:bg-teal-700 relative"
+                    ></div>
+                    <span className="ml-3 text-sm font-medium text-gray-900">
+                    Show sold stocks
+                    </span>
+                </label>
+
+                {/* symbol search Bar */}
+                <input
+                    type="text"
+                    placeholder="Search symbol..."
+                    value={searchSymbolPortfolio}
+                    onChange={(e) => setSearchSymbolPortfolio(e.target.value)}
+                    className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                />
+            </div>
+
+            <div className="overflow-y-auto flex-grow rounded-xl shadow bg-white mb-8">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-800 text-white sticky top-0">
+                  <tr>
+                    <th></th>
+                    <th></th>
+                    <th className="px-4 py-2 text-left">Symbol</th>
+                    <th className="px-4 py-2">Quantity</th>
+                    <th className="px-4 py-2">Last Price</th>
+                    <th className="px-4 py-2">Current Value</th>
+                    <th className="px-4 py-2">Profit/Loss</th>
+                    <th className="px-4 py-2">Realized</th>
+                    <th className="px-4 py-2">Unrealized</th>
+                    <th className="px-4 py-2">Total Fee</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {portfolio.filter(p => showAllPortfolio || p.quantity > 0)
+                  .filter(p => p.stock_symbol.toLowerCase().includes(searchSymbolPortfolio.toLowerCase()))
+                  .map((p, idx) => (
+                    <tr
+                      key={idx}
+                      className="even:bg-gray-100 hover:bg-teal-50 transition"
+                    >
+                      <td className="py-2 pl-1 pr-0">                        
+                        <button
+                          type="button"
+                          className="bg-teal-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          onClick={() => navigate("/add-stock", { state: { symbol: p.stock_symbol } })}
+                        >
+                          <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                          </svg> 
+                        </button>
+                      </td>
+
+                      <td className="py-2 px-0">
+                        <button
+                          type="button"
+                          className="bg-amber-700 border border-amber-700 hover:bg-amber-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          onClick={() => handlePoRowDetailsButton(p.stock_symbol)}
+                        >
+                        <svg class="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H4m0 0v4m0-4 5 5m7-5h4m0 0v4m0-4-5 5M8 20H4m0 0v-4m0 4 5-5m7 5h4m0 0v-4m0 4-5-5"/>
+                        </svg>
+                        </button>
+                      </td>
+                      
+                      <td className="px-4 py-2 font-medium text-gray-800">{p.stock_symbol}</td>
+                      <td className="text-center">{p.quantity}</td>
+                      <td className="text-center">{p.last_price}</td>
+                      <td className="text-center">{p.current_value}</td>
+                      <td className="text-center">{p.pl}</td>
+                      <td className="text-center">{p.realized}</td>
+                      <td className="text-center">{p.unrealized}</td>
+                      <td className="text-center">{p.total_fee}</td>
+
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+        </div>
+);
+
+}
+
+
