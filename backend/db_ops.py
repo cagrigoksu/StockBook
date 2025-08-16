@@ -282,3 +282,31 @@ def get_portfolio_by_user(user_id):
         })
 
     return response
+
+#* get portfolio row data for detail modal
+def get_portfolio_row_detail(symbol):
+    last_price = get_last_price(symbol)
+    
+    ticker = yf.Ticker(symbol)
+    info = ticker.info   
+    
+    data = ticker.history(period="1d", interval="1h")
+    stockDailyCloseValues = []
+    for dt, row in data.iterrows():
+        stockDailyCloseValues.append({
+            "datetime": dt.isoformat(),  # convert Timestamp to ISO string
+            "close": row['Close']
+        })
+    
+    return {
+        "shortName": info.get('shortName'),
+        "displayName": info.get('displayName'),
+        "quoteSourceName": info.get('quoteSourceName'),
+        "currentValue": last_price,
+        "changePercent": info.get('regularMarketChangePercent'),
+        "country": info.get("country"),
+        "sector": info.get("sector"),
+        "currency": info.get("financialCurrency"),
+        "averageAnalystRating": info.get("averageAnalystRating"),
+        "stockDailyCloseValues": stockDailyCloseValues
+        }

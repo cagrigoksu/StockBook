@@ -37,6 +37,11 @@ def get_portfolio():
         return jsonify([])
     return jsonify(do.get_portfolio_by_user(user_id))
 
+@app.route("/api/portfolioRowDetail", methods=["GET"])
+def get_portfolio_row_detail():
+    symbol = request.args.get("symbol") 
+    return jsonify(do.get_portfolio_row_detail(symbol))
+
 @app.route("/api/performance", methods=["GET"])
 def get_performace_data():
     user_id = session.get("user_id")
