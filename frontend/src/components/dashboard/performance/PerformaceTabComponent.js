@@ -1,80 +1,127 @@
 import React from "react";
 
-export default function PerformanceTabComponent({performance})
-{
+export default function PerformanceTabComponent({ performance }) {
+  // Helper function to format currency
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value || 0);
+  };
 
-    return (
-        <div>
-            <div className="">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Performance</h2>
+  return (
+    <div className="max-w-7xl mx-auto p-6  min-h-screen">
+      <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">
+        Performance Dashboard
+      </h2>
 
-                <div className="flex flex-col gap-8 border-2 border-gray-400 rounded-lg p-8 bg-gray-50">
-
-                    {/* Profit & Loss Section */}
-                    <div className="flex flex-col md:flex-row gap-6">
-
-                    {/* Realized */}
-                    <div className="flex-1 border-2 border-black rounded-lg p-6 flex flex-col justify-between">
-                        <div className="flex justify-between mb-4">
-                        <div className="text-center flex-1 mx-2">
-                            <h2 className="text-xl text-green-800 font-semibold">Total Realized Profit</h2>
-                            <p className="text-xl mt-2">{performance.total_realized_profit}</p>
-                        </div>
-                        <div className="text-center flex-1 mx-2">
-                            <h2 className="text-xl text-red-800 font-semibold">Total Realized Loss</h2>
-                            <p className="text-xl mt-2">{performance.total_realized_loss}</p>
-                        </div>
-                        </div>
-                        <div className="text-center mt-4 p-2 border-t border-black">
-                        <h2 className="text-xl font-semibold">Overall Performance</h2>
-                        <p className="text-xl mt-2">{(performance.total_realized_profit-performance.total_realized_loss).toFixed(2)}</p>
-                        </div>
-                    </div>
-
-                    {/* Unrealized */}
-                    <div className="flex-1 border-2 border-black rounded-lg p-6 flex flex-col justify-between">
-                        <div className="flex justify-between mb-4">
-                        <div className="text-center flex-1 mx-2">
-                            <h2 className="text-xl text-green-800 font-semibold">Total Unrealized Profit</h2>
-                            <p className="text-xl mt-2">{performance.total_unrealized_profit}</p>
-                        </div>
-                        <div className="text-center flex-1 mx-2">
-                            <h2 className="text-xl text-red-800 font-semibold">Total Unrealized Loss</h2>
-                            <p className="text-xl mt-2">{performance.total_unrealized_loss}</p>
-                        </div>
-                        </div>
-                        <div className="text-center mt-4 p-2 border-t border-black">
-                        <h2 className="text-xl font-semibold">Overall Performance</h2>
-                        <p className="text-xl mt-2">{(performance.total_unrealized_profit-performance.total_unrealized_loss)}</p>
-                        </div>
-                    </div>
-
-                    </div>
-
-                    {/* Other Metrics */}
-                    <div className="border-2 border-black rounded-lg p-6 bg-white">
-                    <h2 className="text-2xl font-semibold mb-4">Other Metrics</h2>
-                    <div className="flex flex-wrap gap-4">
-                        <div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
-                            <h2 className="text-xl text-black font-medium">Total Fee</h2>
-                            <p className="text-xl mt-2">{performance.total_fee}</p>
-                        </div>
-
-                        <div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
-                            <h2 className="text-xl text-black font-medium">Total Transactions</h2>
-                            <p className="text-xl mt-2">Buy: {performance.total_transactions.buy} - Sell: {performance.total_transactions.sell}</p>
-                        </div>
-
-                        {<div className="text-center flex-1 min-w-[150px] p-4 border rounded-md">
-                            <h2 className="text-xl text-black font-medium">Invested Stocks</h2>
-                            <p className="text-xl mt-2">Total: {performance.invested_stocks.total} - Owned: {performance.invested_stocks.non_zero_stocks} Sold: {performance.invested_stocks.zero_stocks}</p>
-                        </div> }
-                    </div>
-                    </div>
-
-                </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Realized Profit/Loss Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            Realized Performance
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <h4 className="text-sm font-medium text-green-800 uppercase tracking-wide">
+                Realized Profit
+              </h4>
+              <p className="text-2xl font-bold text-green-900 mt-2">
+                {formatCurrency(performance.total_realized_profit)}
+              </p>
             </div>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <h4 className="text-sm font-medium text-red-800 uppercase tracking-wide">
+                Realized Loss
+              </h4>
+              <p className="text-2xl font-bold text-red-900 mt-2">
+                {formatCurrency(performance.total_realized_loss)}
+              </p>
+            </div>
+          </div>
+          
+          <div className={`text-center p-4 ${(performance.total_realized_profit - performance.total_realized_loss) > 0 ? "bg-green-200" :"bg-red-200"} rounded-lg border border-gray-200`}>
+            <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+              Net Performance
+            </h4>
+            <p className="text-2xl font-bold text-gray-900 mt-2">
+              {formatCurrency(performance.total_realized_profit - performance.total_realized_loss)}
+            </p>
+          </div>
         </div>
-    );
-    
+
+        {/* Unrealized Profit/Loss Card */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            Unrealized Performance
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="text-center p-4 bg-green-50 rounded-lg">
+              <h4 className="text-sm font-medium text-green-800 uppercase tracking-wide">
+                Unrealized Profit
+              </h4>
+              <p className="text-2xl font-bold text-green-900 mt-2">
+                {formatCurrency(performance.total_unrealized_profit)}
+              </p>
+            </div>
+            <div className="text-center p-4 bg-red-50 rounded-lg">
+              <h4 className="text-sm font-medium text-red-800 uppercase tracking-wide">
+                Unrealized Loss
+              </h4>
+              <p className="text-2xl font-bold text-red-900 mt-2">
+                {formatCurrency(performance.total_unrealized_loss)}
+              </p>
+            </div>
+          </div>
+
+          <div className={`text-center p-4 ${(performance.total_unrealized_profit - performance.total_unrealized_loss) > 0 ? "bg-green-200" :"bg-red-200"} rounded-lg border border-gray-200`}>          
+            <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+              Net Performance
+            </h4>
+            <p className="text-2xl font-bold text-gray-900 mt-2">
+              {formatCurrency(performance.total_unrealized_profit - performance.total_unrealized_loss)}
+            </p>
+          </div>
+        </div>
+
+        {/* Other Metrics Card */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+            Additional Metrics
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+              <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                Total Fees
+              </h4>
+              <p className="text-2xl font-bold text-gray-900 mt-2">
+                {formatCurrency(performance.total_fee)}
+              </p>
+            </div>
+            
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+              <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                Transactions
+              </h4>
+              <p className="text-xl font-medium text-gray-900 mt-2">
+                Buy: {performance.total_transactions.buy} • Sell: {performance.total_transactions.sell}
+              </p>
+            </div>
+            
+            <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-200">
+              <h4 className="text-sm font-medium text-gray-700 uppercase tracking-wide">
+                Invested Stocks
+              </h4>
+              <p className="text-xl font-medium text-gray-900 mt-2">
+                Total: {performance.invested_stocks.total} • Owned: {performance.invested_stocks.non_zero_stocks} • Sold: {performance.invested_stocks.zero_stocks}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
