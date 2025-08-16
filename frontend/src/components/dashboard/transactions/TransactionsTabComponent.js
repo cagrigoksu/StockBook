@@ -101,7 +101,7 @@ export default function TransactionsTabComponent({
                           key={idx}
                           className="even:bg-gray-100 hover:bg-blue-50 transition"
                         >
-                          {t.transaction_type === "BUY" ? (<td className="pl-1 py-2">
+                          {t.transaction_type === "BUY" && t.remaining_quantity > 1e-6 ? (<td className="pl-1 py-2">
                             <button
                               type="button"
                               className="bg-lime-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
