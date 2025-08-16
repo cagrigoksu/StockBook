@@ -292,7 +292,7 @@ def get_portfolio_by_user(user_id):
             "quantity": round(data['quantity'], 5),
             "last_price": round(last_price, 2),
             "current_value": round(current_value, 2),
-            "pl": round(data['realized'] + current_value, 2),  # use stored pnl
+            "pl": round(data['realized'] + data['unrealized'], 2),  # use stored pnl
             "realized": round(data['realized'], 2),
             "unrealized": round(data['unrealized'], 2),
             "total_fee": round(data['total_fee'], 2),
