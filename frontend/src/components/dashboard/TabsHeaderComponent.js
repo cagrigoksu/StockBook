@@ -11,8 +11,8 @@ export default function TabsHeaderComponent({ tabs, activeTab, setActiveTab})
               onClick={() => setActiveTab(idx)}
               className={`py-2 px-4 text-lg font-medium ${
                 activeTab === idx
-                  ? "text-amber-700 border-b-2 border-amber-800"
-                  : "text-gray-600"
+                  ? "text-gray-800 border-b-2 border-gray-800 text-xl"
+                  : "text-gray-600 text-lg"
               }`}
             >
               {tab}

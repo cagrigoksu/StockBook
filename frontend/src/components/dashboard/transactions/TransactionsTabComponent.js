@@ -32,13 +32,13 @@ export default function TransactionsTabComponent({
     }
 
     return (
-            <div>
+            <div className="h-full">
               <div className="flex flex-col h-[calc(100vh-180px)]">
                 <div className="flex justify-between items-center mb-4">
                   <h1 className="text-3xl font-bold text-gray-800">Your Transactions</h1>
                   <div className="space-x-2">
                     <button
-                      className="bg-amber-600 text-white px-4 py-2 rounded-xl hover:bg-amber-700 transition"
+                      className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition"
                       onClick={() => navigate("/add-stock")}
                     >
                       Add Stock
@@ -52,7 +52,7 @@ export default function TransactionsTabComponent({
                     />
                     <button
                       onClick={openFilePicker}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-700 transition"
+                      className="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition"
                     >
                       Upload Statement
                     </button>

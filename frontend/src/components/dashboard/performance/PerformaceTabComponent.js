@@ -10,7 +10,7 @@ export default function PerformanceTabComponent({ performance }) {
   };
 
   return (
-    <div className="max-w-7xl">
+    <div className="max-w-7xl h-full">
       <h2 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">
         Performance Dashboard
       </h2>

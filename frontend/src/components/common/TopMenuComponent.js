@@ -24,10 +24,12 @@ export default function TopMenuComponent() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-white bg-amber-700 hover:bg-amber-800 focus:ring-1 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
+        className="text-white bg-gray-600 hover:bg-gray-800 focus:ring-1 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
         type="button"
       >
-        Dropdown
+        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h14"/>
+        </svg>
         <svg
           className="w-2.5 h-2.5 ms-3"
           aria-hidden="true"
