@@ -56,7 +56,11 @@ def create_transactions_table():
 def get_last_price(symbol):
     ticker = yf.Ticker(symbol)
     data = ticker.history(period="1d", interval="1m")
-    return round(data['Close'].iloc[-1], 2)
+    if data.empty or 'Close' not in data.columns:
+        return 0.0
+    
+    result = data['Close'].iloc[-1]
+    return round(result, 2)
 
 #* save transaction
 def save_transaction(transaction: Transaction, user_id: int):

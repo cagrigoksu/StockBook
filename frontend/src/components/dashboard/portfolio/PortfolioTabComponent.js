@@ -1,10 +1,9 @@
 import React, {useState} from "react";
-import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
 
 import API from "../../../api";
 
 import PortfolioRowDetailsModalComponent from "./PortfolioRowDetailsModalComponent";
+import AddTransactionModalComponent from "../transactions/AddTransactionModalComponent";
 
 
 export default function PortfolioTabComponent({portfolio}) 
@@ -42,9 +41,9 @@ export default function PortfolioTabComponent({portfolio})
     const [showAllPortfolio, setShowAllPortfolio] = useState(true);
     const [searchSymbolPortfolio, setSearchSymbolPortfolio] = useState("");
     
-    const navigate = useNavigate();
     const [selectedPoRowSymbol, setSelectedPoRowSymbol] = useState("");
     const [showPoRowDetailsModal, setShowPoRowDetailsModal ] = useState(false);
+    const [showAddTransactionModal, setShowAddTransactionModal] = useState(false)
     const [portfolioRowData, setPortfolioRowData] = useState({})
     const [chartData, setChartData] = useState(null);
 
@@ -110,7 +109,9 @@ export default function PortfolioTabComponent({portfolio})
                         <button
                           type="button"
                           className="bg-teal-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
-                          onClick={() => navigate("/add-stock", { state: { symbol: p.stock_symbol } })}
+                          onClick={() => {
+                            setSelectedPoRowSymbol(p.stock_symbol);
+                            setShowAddTransactionModal(true);}}
                         >
                           <svg className="w-6 h-4 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5"/>
@@ -144,6 +145,13 @@ export default function PortfolioTabComponent({portfolio})
                 </tbody>
               </table>
             </div>
+
+            {showAddTransactionModal && (
+              <AddTransactionModalComponent 
+                symbol = {selectedPoRowSymbol}
+                setShowAddTransactionModal={setShowAddTransactionModal}
+              />
+            )}
 
             {showPoRowDetailsModal && (
               <PortfolioRowDetailsModalComponent 

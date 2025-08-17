@@ -16,43 +16,52 @@ import TransactionsTabComponent from "./transactions/TransactionsTabComponent";
 
 function Dashboard() {
 
+  // loading indicators
   const [loadingPortfolio, setLoadingPortfolio] = useState(false);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [loadingPerformance, setLoadingPerformance] = useState(false);
 
+  // data
   const [portfolio, setPortfolio] = useState([]);
-
-  const fetchPortfolio = () => {
-
-      setLoadingPortfolio(true);
-      API.get("/portfolio").then((res) =>
-        setPortfolio(res.data)
-      ).finally(() => setLoadingPortfolio(false));
-    };
-
   const [transactions, setTransactions] = useState([]);
+  const [performance, setPerformance] = useState([]);
+
+  // filters/search
   const [searchSymbolTransactions, setSearchSymbolTransactions] = useState("");
   const [transactionTypeFilter, setTransactionTypeFilter] = useState("ALL");
 
-  const [performance, setPerformance] = useState([]);
+  // State for active tab
   const [activeTab, setActiveTab] = useState(0);
+  const tabs = ["Overview", "Performance", "Transactions"];
+
+  const fileInputRef = useRef(null);
 
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
   const userId = localStorage.getItem("user_id");
+
+  // fetch functions
+  const fetchPortfolio = () => {
+    setLoadingPortfolio(true);
+    API.get("/portfolio").then((res) =>
+      setPortfolio(res.data)
+    ).finally(() => setLoadingPortfolio(false));
+  };
 
   const fetchPerformanceData = () => {
     setLoadingPerformance(true);
-    API.get("/performance").then((res) => setPerformance(res.data))
-      .finally(() => setLoadingPerformance(false));
-  }
+    API.get("/performance").then((res) =>
+      setPerformance(res.data)
+    ).finally(() => setLoadingPerformance(false));
+  };
 
   const fetchTransactions = () => {
     setLoadingTransactions(true);
-    API.get("/transactions").then((res) => setTransactions(res.data))
-      .finally(() => setLoadingTransactions(false));
+    API.get("/transactions").then((res) =>
+      setTransactions(res.data)
+    ).finally(() => setLoadingTransactions(false));
   };
 
+  // effects
   useEffect(() => {
     if (!userId) return navigate("/");
     fetchPortfolio();
@@ -60,6 +69,7 @@ function Dashboard() {
     fetchTransactions();
   }, [userId, navigate]);
 
+  // handlers
   const openFilePicker = () => fileInputRef.current?.click();
 
   const handleStatementUpload = async (e) => {
@@ -87,70 +97,64 @@ function Dashboard() {
     }
   };
 
-  const tabs = ["Overview", "Performance", "Transactions"];
-
   return (
     <>
-    <Helmet>
+      <Helmet>
         <title>StockBook | Dashboard</title>
-    </Helmet>
-    <div className="min-h-screen bg-gray-100 pt-2">
-    
-      <div className="max-w-7xl mx-auto">
+      </Helmet>
+      <div className="min-h-screen bg-gray-100 pt-2">
+        <div className="max-w-7xl mx-auto">
 
-        <div className="flex justify-between items-center mb-4">
-          <LogoComponent />
-          <TopMenuComponent />
-        </div>
+          <div className="flex justify-between items-center mb-4">
+            <LogoComponent />
+            <TopMenuComponent />
+          </div>
 
-        {/* tabs header */}
-        <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
+          {/* Tabs header */}
+          <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="h-[calc(100vh-180px)]">
-          {/* Portfolio Tab */}
-          {activeTab === 0 && (
-            loadingPortfolio ? (
-              <SpinnerComponent />
-            ) : (
-              <div className="h-full flex flex-col">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-3xl font-bold text-gray-800">Your Portfolio</h1>
+          <div className="h-[calc(100vh-180px)]">
+            {/* Portfolio Tab */}
+            {activeTab === 0 && (
+              loadingPortfolio ? (
+                <SpinnerComponent />
+              ) : (
+                <div className="h-full flex flex-col">
+                  <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl font-bold text-gray-800">Your Portfolio</h1>
+                  </div>
+                  <PortfolioTabComponent portfolio={portfolio} />
                 </div>
+              )
+            )}
 
-                <PortfolioTabComponent portfolio={portfolio} />
-              </div>
-            )
-          )}
+            {/* Performance Tab */}
+            {activeTab === 1 && (
+              loadingPerformance ? (
+                <SpinnerComponent />
+              ) : (
+                <PerformanceTabComponent performance={performance}/>
+              )
+            )}
 
-          {/* Performance Tab */}
-          {activeTab === 1 && (
-            loadingPerformance ? 
-            (<SpinnerComponent />):
-            (
-            <PerformanceTabComponent performance={performance}/>
-            )
-          )}
-
-          {/* Transactions Tab */}
-          {activeTab === 2 && (
-            loadingTransactions ? 
-            (<SpinnerComponent />) :
-            (
-            <TransactionsTabComponent 
-              fileInputRef={fileInputRef}
-              handleStatementUpload={handleStatementUpload}
-              openFilePicker={openFilePicker}
-              searchSymbolTransactions={searchSymbolTransactions} setSearchSymbolTransactions={setSearchSymbolTransactions}
-              transactionTypeFilter={transactionTypeFilter} setTransactionTypeFilter={setTransactionTypeFilter}
-              transactions={transactions}
-            />
-            )
-          )}
+            {/* Transactions Tab */}
+            {activeTab === 2 && (
+              loadingTransactions ? (
+                <SpinnerComponent />
+              ) : (
+                <TransactionsTabComponent
+                  fileInputRef={fileInputRef}
+                  handleStatementUpload={handleStatementUpload}
+                  openFilePicker={openFilePicker}
+                  searchSymbolTransactions={searchSymbolTransactions} setSearchSymbolTransactions={setSearchSymbolTransactions}
+                  transactionTypeFilter={transactionTypeFilter} setTransactionTypeFilter={setTransactionTypeFilter}
+                  transactions={transactions}
+                />
+              )
+            )}
+          </div>
         </div>
-
       </div>
-
-    </div>
     </>
   );
 }

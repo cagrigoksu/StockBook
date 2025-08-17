@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet";
 
 import TransactionsRowRiskProfModalComponent from "./TransactionsRowRiskProfModalComponent";
+import AddTransactionModalComponent from "./AddTransactionModalComponent";
 
 export default function TransactionsTabComponent({
     fileInputRef,
@@ -17,6 +17,7 @@ export default function TransactionsTabComponent({
 
     const navigate = useNavigate();
 
+    const [showAddTransactionModal, setShowAddTransactionModal] = useState(false)
     const [selectedTrRowSymbol, setSelectedTrRowSymbol] = useState("");
     const [selectedRowQty, setSelectedRowQty] = useState(0);
     const [selectedRowPrice, setSelectedRowPrice] = useState(0);
@@ -32,6 +33,10 @@ export default function TransactionsTabComponent({
       setShowTrRowRiskProfModal(true);
     }
 
+    const handleAddTransactionModal = () => {
+      setShowAddTransactionModal(true);
+    }
+
     return (
       <>
             <div className="h-full">
@@ -41,7 +46,7 @@ export default function TransactionsTabComponent({
                   <div className="space-x-2">
                     <button
                       className="bg-gray-600 text-white px-4 py-2 rounded-xl hover:bg-gray-800 transition"
-                      onClick={() => navigate("/add-stock")}
+                      onClick={handleAddTransactionModal}
                     >
                       Add Stock
                     </button>
@@ -140,6 +145,12 @@ export default function TransactionsTabComponent({
                 selectedRowPrice={selectedRowPrice}
                 selectedRowFee={selectedRowFee}
                 onClose={() => setShowTrRowRiskProfModal(false)}
+              />
+            )}
+
+            {showAddTransactionModal && (
+              <AddTransactionModalComponent 
+                setShowAddTransactionModal={setShowAddTransactionModal}
               />
             )}
             
