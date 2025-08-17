@@ -10,6 +10,7 @@ import TabsHeaderComponent from "./TabsHeaderComponent";
 import PortfolioTabComponent from "./portfolio/PortfolioTabComponent";
 import PerformanceTabComponent from "./performance/PerformaceTabComponent";
 import TransactionsTabComponent from "./transactions/TransactionsTabComponent";
+import FooterComponent from "../common/FooterComponent";
 
 function Dashboard() {
 
@@ -28,7 +29,7 @@ function Dashboard() {
       <Helmet>
         <title>StockBook | Dashboard</title>
       </Helmet>
-      <div className="min-h-screen bg-gray-100 pt-2">
+      <div className="min-h-screen  bg-gray-100 pt-2">
         <div className="max-w-7xl mx-auto">
 
           <div className="flex justify-between items-center mb-4">
@@ -39,7 +40,7 @@ function Dashboard() {
           {/* Tabs header */}
           <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <div className="h-[calc(100vh-180px)]">
+          <div className="h-[calc(100vh-224px)]">
             {/* Portfolio Tab */}
             {activeTab === 0 && (
               <PortfolioTabComponent />
@@ -56,6 +57,9 @@ function Dashboard() {
             )}
           </div>
         </div>
+
+        {/* Footer */}
+        <FooterComponent />
       </div>
     </>
   );

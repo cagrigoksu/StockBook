@@ -98,7 +98,7 @@ export default function PortfolioTabComponent() {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-400"
             />
           </div>
-          <div className="overflow-y-auto max-h-[55vh] flex-grow rounded-xl shadow bg-white mb-8">
+          <div className="overflow-y-auto max-h-[50vh] flex-grow rounded-xl shadow bg-white mb-8">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-800 text-white sticky top-0 z-10">
                 <tr>

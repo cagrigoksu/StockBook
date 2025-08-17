@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 import TransactionsRowRiskProfModalComponent from "./TransactionsRowRiskProfModalComponent";
 import AddTransactionModalComponent from "./AddTransactionModalComponent";
@@ -10,8 +9,6 @@ import API from "../../../api";
 export default function TransactionsTabComponent() {
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [transactions, setTransactions] = useState([]);
-
-  const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
   const openFilePicker = () => fileInputRef.current?.click();

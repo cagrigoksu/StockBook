@@ -30,7 +30,6 @@ def user_logout():
     session.pop("user_id", None)
     return jsonify({"status": "success"})
 
-#TODO : check realized return
 @app.route("/api/portfolio", methods=["GET"])
 def get_portfolio():
     user_id = session.get("user_id")
@@ -43,6 +42,7 @@ def get_portfolio_row_detail():
     symbol = request.args.get("symbol") 
     return jsonify(do.get_portfolio_row_detail(symbol))
 
+#TODO: add dividend data
 @app.route("/api/performance", methods=["GET"])
 def get_performace_data():
     user_id = session.get("user_id")
