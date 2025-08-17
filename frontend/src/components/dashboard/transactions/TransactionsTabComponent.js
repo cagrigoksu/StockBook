@@ -42,7 +42,7 @@ export default function TransactionsTabComponent() {
       });
 
       alert(res.data.message || "Upload succeeded!");
-      navigate("/"); // Reload table data
+      fetchTransactions() // Reload table data
     } catch (err) {
       console.error(err);
       alert("Upload failed");
