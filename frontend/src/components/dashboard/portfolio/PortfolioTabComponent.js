@@ -84,7 +84,7 @@ export default function PortfolioTabComponent() {
                 className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-300 rounded-full peer dark:bg-gray-700 
                 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
                 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all 
-                peer-checked:bg-amber-700 relative"
+                peer-checked:bg-sky-700 relative"
               ></div>
               <span className="ml-3 text-sm font-medium text-gray-900">
                 Show sold stocks
@@ -127,12 +127,12 @@ export default function PortfolioTabComponent() {
                   .map((p, idx) => (
                     <tr
                       key={idx}
-                      className="even:bg-gray-100 hover:bg-teal-50 transition"
+                      className="even:bg-gray-100 hover:bg-blue-50 transition"
                     >
                       <td className="py-2 pl-1 pr-0">
                         <button
                           type="button"
-                          className="bg-teal-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          className="bg-blue-700 border border-blue-700 hover:bg-blue-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
                           onClick={() => {
                             setSelectedPoRowSymbol(p.stock_symbol);
                             setShowAddTransactionModal(true);
@@ -160,7 +160,7 @@ export default function PortfolioTabComponent() {
                       <td className="py-2 px-0">
                         <button
                           type="button"
-                          className="bg-amber-700 border border-amber-700 hover:bg-amber-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                          className="bg-sky-700 border border-sky-700 hover:bg-sky-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
                           onClick={() =>
                             handlePoRowDetailsButton(p.stock_symbol)
                           }

@@ -29,7 +29,7 @@ function Dashboard() {
       <Helmet>
         <title>StockBook | Dashboard</title>
       </Helmet>
-      <div className="min-h-screen  bg-gray-100 pt-2">
+      <div className="min-h-screen  bg-gray-100 pt-10">
         <div className="max-w-7xl mx-auto">
 
           <div className="flex justify-between items-center mb-4">
@@ -40,7 +40,7 @@ function Dashboard() {
           {/* Tabs header */}
           <TabsHeaderComponent tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          <div className="h-[calc(100vh-224px)]">
+          <div className="h-[calc(100vh-247px)]">
             {/* Portfolio Tab */}
             {activeTab === 0 && (
               <PortfolioTabComponent />

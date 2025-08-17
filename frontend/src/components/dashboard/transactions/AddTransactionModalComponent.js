@@ -133,7 +133,7 @@ export default function AddTransactionModalComponent({
                 </button>
                 <button
                     type="submit"
-                    className="bg-amber-600 text-white px-6 py-2 rounded-xl hover:bg-amber-700 transition"
+                    className="bg-sky-600 text-white px-6 py-2 rounded-xl hover:bg-sky-700 transition"
                 >
                 save
                 </button>

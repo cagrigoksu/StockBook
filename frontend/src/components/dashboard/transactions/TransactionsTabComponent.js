@@ -104,7 +104,7 @@ export default function TransactionsTabComponent() {
               />
               <button
                 onClick={openFilePicker}
-                className="bg-teal-600 text-white px-4 py-2 rounded-xl hover:bg-teal-700 transition"
+                className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
               >
                 Upload Statement
               </button>
@@ -169,7 +169,7 @@ export default function TransactionsTabComponent() {
                         <td className="pl-1 py-2">
                           <button
                             type="button"
-                            className="bg-lime-700 border border-teal-700 hover:bg-teal-800 hover:text-white font-medium rounded-full text-sm p-2 text-center inline-flex items-center"
+                            className="bg-sky-700 border hover:bg-sky-800 font-medium rounded-e-lg text-sm p-2 text-center inline-flex items-center"
                             onClick={() =>
                               handleTrRowRiskProfButton(
                                 t.stock_symbol,
