@@ -9,25 +9,23 @@ from db import db
 from services import db_ops as do
 from services.revolut_ops import saveStatementData
 from models.transaction_model import Transaction, TransactionTypeEnum
-from init_db import init_db  # <-- Import the new init function
+from init_db import init_db  
 
-# Load environment variables
+
 load_dotenv()
+load_dotenv(dotenv_path=".env.local", override=True)
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-# Config
+#!config
 app.secret_key = config.SECRET_KEY
 app.permanent_session_lifetime = timedelta(minutes=10)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Initialize DB
 db.init_app(app)
-init_db(app)  # <-- Run DB initialization safely
-
-# ---------------- Routes ---------------- #
+init_db(app)  #
 
 @app.route("/api/users", methods=["GET"])
 def list_users():

@@ -12,10 +12,7 @@ from models.user_model import User
 from models.transaction_model import Transaction, TransactionTypeEnum
 
 
-# ---------- Helpers ----------
-
 def get_last_price(symbol: str) -> float:
-    """Fetch last price; fallback to 0.0 if unavailable."""
     try:
         ticker = yf.Ticker(symbol)
         data = ticker.history(period="1d", interval="1m")
@@ -26,13 +23,8 @@ def get_last_price(symbol: str) -> float:
         return 0.0
 
 
-# ---------- Persistence ----------
-
 def save_transaction(transaction: Transaction) -> None:
-    """
-    Persist a transaction and (for SELL) compute realized PnL using FIFO,
-    updating the matched BUY rows' remaining_quantity.
-    """
+    
     db.session.add(transaction)
     db.session.flush()  # allocate transaction.id, keep in same txn
 
@@ -50,7 +42,7 @@ def save_transaction(transaction: Transaction) -> None:
                 Transaction.remaining_quantity > 0,
             )
             .order_by(asc(Transaction.id))
-            .with_for_update()  # lock rows during deduction
+            .with_for_update() 
             .all()
         )
 
@@ -67,7 +59,6 @@ def save_transaction(transaction: Transaction) -> None:
             buy_fee_per_share = (buy.fee / remaining) if remaining else 0.0
             sell_fee_per_share = (transaction.fee / float(transaction.quantity)) if transaction.quantity else 0.0
 
-            # lot-level pnl
             lot_pnl = qty_deduct * (
                 (float(transaction.price_per_share) - sell_fee_per_share) -
                 (float(buy.price_per_share) + buy_fee_per_share)
@@ -81,8 +72,6 @@ def save_transaction(transaction: Transaction) -> None:
 
     db.session.commit()
 
-
-# ---------- Queries for API ----------
 
 def get_users() -> List[Dict[str, Any]]:
     users = db.session.query(User).order_by(asc(User.id)).all()
@@ -112,7 +101,7 @@ def get_transactions_by_user(user_id: int) -> List[Dict[str, Any]]:
 
 
 def get_performance_data_by_user(user_id: int) -> Dict[str, Any]:
-    # exclude DIVIDEND from portfolio math but they still exist as transactions (pnl holds dividend amount)
+    #TODO exclude DIVIDEND from portfolio math but they still exist as transactions (pnl holds dividend amount)
     txs = (
         db.session.query(
             Transaction.stock_symbol,
@@ -206,7 +195,7 @@ def get_performance_data_by_user(user_id: int) -> Dict[str, Any]:
 
 
 def get_portfolio_by_user(user_id: int) -> List[Dict[str, Any]]:
-    # Fetch all non-dividend txs ordered by id to reproduce previous logic
+
     txs = (
         db.session.query(
             Transaction.stock_symbol,
@@ -300,7 +289,7 @@ def get_portfolio_row_detail(symbol: str) -> Dict[str, Any]:
     try:
         info = ticker.info or {}
     except Exception:
-        # yfinance sometimes raises for .info; keep defaults
+        #* yfinance sometimes raises for .info; keep defaults
         info = {}
 
     # intraday close samples

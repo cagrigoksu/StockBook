@@ -6,5 +6,6 @@ backend/uploads/
 frontend/.vscode/
 
 .env
+.env.local
 
 __pycache__

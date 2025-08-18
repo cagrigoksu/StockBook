@@ -24,7 +24,6 @@ class Transaction(db.Model):
     pnl = db.Column(db.Float, nullable=False, default=0)
     transaction_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-    # Relationships
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     user = db.relationship("User", back_populates="transactions")
 

@@ -14,19 +14,12 @@ from services.db_ops import save_transaction
 def _parse_float(value) -> float:
     if isinstance(value, (int, float)):
         return float(value)
-    # keep only digits and dot; also handle commas
+    #* keep only digits and dot; also handle commas
     return float(re.sub(r"[^\d\.]", "", str(value).replace(",", "")) or 0)
 
 
 def saveStatementData(file) -> None:
-    """
-    Reads a Revolut CSV (as uploaded FileStorage), maps to Transaction rows,
-    and saves them for the currently selected user (config.USER_ID).
-    - BUY/SELL: compute fee as |Total - qty*price|
-    - DIVIDEND: store received amount in pnl
-    - Convert timestamps to CET/CEST (Europe/Berlin)
-    - Map a few custom tickers to exchange-specific symbols as before
-    """
+ 
     user_id = config.USER_ID
     if not user_id:
         raise ValueError("No user selected. Please select a user before uploading.")
@@ -53,10 +46,10 @@ def saveStatementData(file) -> None:
         raw_type = str(row["Type"])
         tx_type = type_map.get(raw_type)
         if tx_type is None:
-            # Skip unknown types but keep the import robust
             print(f"Skipping unknown transaction type: {raw_type}")
             continue
-
+        
+        #TODO : think about dividend in calculations
         if tx_type == TransactionTypeEnum.DIVIDEND:
             quantity = 1.0
             remaining_quantity = 0.0
@@ -72,7 +65,7 @@ def saveStatementData(file) -> None:
             fee = abs(total_amount - (quantity * price_per_share))
             pnl = 0.0
 
-        # Parse date to timezone-aware CET/CEST
+        #! parse date to timezone-aware CET/CEST
         dt_utc = parser.parse(str(row["Date"]))
         dt_cet = dt_utc.astimezone(ZoneInfo("Europe/Berlin"))
 
