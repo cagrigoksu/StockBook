@@ -5,7 +5,6 @@ backend/uploads/
 
 frontend/.vscode/
 
-stocks*.db
-stocks.db-journal
+.env
 
 __pycache__

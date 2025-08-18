@@ -1,18 +1,33 @@
-from flask import Flask, request, jsonify, session, send_from_directory
-from flask_cors import CORS
-import db_ops as do
-from transaction_model import Transaction, TransactionTypeEnum
-from revolut_ops import saveStatementData
-from datetime import datetime, timedelta
-import config
 import os
+from flask import Flask, request, jsonify, session
+from flask_cors import CORS
+from dotenv import load_dotenv
+from datetime import timedelta, datetime
+
+import config
+from db import db
+from services import db_ops as do
+from services.revolut_ops import saveStatementData
+from models.transaction_model import Transaction, TransactionTypeEnum
+from init_db import init_db  # <-- Import the new init function
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = config.SECRET_KEY
-app.permanent_session_lifetime = timedelta(minutes=10)
 CORS(app, supports_credentials=True)
 
-do.db_prepare()
+# Config
+app.secret_key = config.SECRET_KEY
+app.permanent_session_lifetime = timedelta(minutes=10)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize DB
+db.init_app(app)
+init_db(app)  # <-- Run DB initialization safely
+
+# ---------------- Routes ---------------- #
 
 @app.route("/api/users", methods=["GET"])
 def list_users():
@@ -37,19 +52,13 @@ def get_portfolio():
         return jsonify([])
     return jsonify(do.get_portfolio_by_user(user_id))
 
-@app.route("/api/portfolioRowDetail", methods=["GET"])
-def get_portfolio_row_detail():
-    symbol = request.args.get("symbol") 
-    return jsonify(do.get_portfolio_row_detail(symbol))
-
-#TODO: add dividend data
 @app.route("/api/performance", methods=["GET"])
-def get_performace_data():
+def get_performance():
     user_id = session.get("user_id")
     if not user_id:
         return jsonify([])
     return jsonify(do.get_performance_data_by_user(user_id))
-    
+
 @app.route("/api/transactions", methods=["GET"])
 def get_transactions():
     user_id = session.get("user_id")
@@ -65,27 +74,27 @@ def add_transaction():
 
     data = request.json
     remaining_quantity = data["quantity"] if TransactionTypeEnum[data["transaction_type"]] == TransactionTypeEnum.BUY else 0
-        
+
     tx = Transaction(
-        stock_symbol = data["stock_symbol"],
-        transaction_type = TransactionTypeEnum[data["transaction_type"]],
-        quantity = data["quantity"],
-        remaining_quantity = remaining_quantity,
-        fee = data["fee"],
-        price_per_share = data["price_per_share"],
-        transaction_date = datetime.fromisoformat(data["transaction_date"]),
-        pnl = 0
+        stock_symbol=data["stock_symbol"],
+        transaction_type=TransactionTypeEnum[data["transaction_type"]],
+        quantity=data["quantity"],
+        remaining_quantity=remaining_quantity,
+        price_per_share=data["price_per_share"],
+        fee=data["fee"],
+        pnl=0,
+        transaction_date=datetime.fromisoformat(data["transaction_date"]),
+        user_id=int(user_id)
     )
-    do.save_transaction(tx, int(user_id))
+    do.save_transaction(tx)
     return jsonify({"status": "saved"})
 
 @app.route("/api/upload_statement", methods=["POST"])
 def upload_statement():
     file = request.files['file']
-    #file_path = os.path.join('backend/uploads', str(config.USER_ID))
-    #file.save(file_path)
     saveStatementData(file)
     return jsonify({"status": "uploaded"})
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run(debug=True)

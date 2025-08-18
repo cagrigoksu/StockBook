@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  stockbook_db:
+    image: postgres:16
+    container_name: stockbook_db
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  stockbook_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stockbook_backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@stockbook_db:5432/${POSTGRES_DB}
+    env_file:
+      - .env
+    depends_on:
+      - stockbook_db
+
+  stockbook_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stockbook_frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    command: ["npm", "start"]
+    depends_on:
+      - stockbook_backend
+
+volumes:
+  pgdata:
