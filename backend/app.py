@@ -25,7 +25,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
-init_db(app)  #
+init_db(app)
 
 @app.route("/api/users", methods=["GET"])
 def list_users():
