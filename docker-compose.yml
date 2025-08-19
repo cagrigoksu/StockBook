@@ -1,9 +1,12 @@
 
 services:
+
+  # PostgreSQL 16 and new stockbook_db database. 
   stockbook_db:
     image: postgres:16
     container_name: stockbook_db
     environment:
+      # configure these in .env
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_DB
@@ -12,11 +15,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
+      # postgre needs to be ready to accept connection, otherwice backend gives error.
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # Backend with Python and Flask. 
   stockbook_backend:
     build:
       context: ./backend
@@ -32,8 +37,10 @@ services:
       - ./backend/.env
     depends_on:
       stockbook_db:
+        # check is stockbook_db is ready and reachable.
         condition: service_healthy
 
+  # Frontend with React and Tailwind. 
   stockbook_frontend:
     build:
       context: ./frontend
